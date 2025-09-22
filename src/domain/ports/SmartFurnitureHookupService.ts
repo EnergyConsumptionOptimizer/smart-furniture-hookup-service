@@ -17,6 +17,9 @@ export interface SmartFurnitureHookupService {
    *
    * @param id - The unique identifier of the smart furniture hookup.
    * @returns A promise that resolves to the smart furniture hookup if found, or `null` otherwise.
+   *
+   * @throws InvalidIDError
+   * @throws SmartFurnitureHookupNotFoundError
    */
   getSmartFurnitureHookup(
     id: SmartFurnitureHookupID,
@@ -28,6 +31,9 @@ export interface SmartFurnitureHookupService {
    * @param name - The name of the new smart furniture hookup.
    * @param consumption - The consumption information of the new smart furniture hookup.
    * @param endpoint - The endpoint of the new smart furniture hookup.
+   *
+   * @throws SmartFurnitureHookupNameConflictError
+   * @throws SmartFurnitureHookupEndpointConflictError
    */
   createSmartFurnitureHookup(
     name: string,
@@ -41,6 +47,11 @@ export interface SmartFurnitureHookupService {
    * @param id - The unique identifier of the smart furniture hookup.
    * @param name - The new name to set.
    * @param endpoint - The new endpoint to set.
+   *
+   * @throws InvalidIDError
+   * @throws SmartFurnitureHookupNotFoundError
+   * @throws SmartFurnitureHookupNameConflictError
+   * @throws SmartFurnitureHookupEndpointConflictError
    */
   updateSmartFurnitureHookup(
     id: SmartFurnitureHookupID,
@@ -52,6 +63,9 @@ export interface SmartFurnitureHookupService {
    *  Deletes an existing smart furniture hookup by their unique identifier.
    *
    * @param id - The unique identifier of the smart furniture hookup.
+   *
+   * @throws InvalidIDError
+   * @throws SmartFurnitureHookupNotFoundError
    */
   deleteSmartFurnitureHookup(id: SmartFurnitureHookupID): Promise<void>;
 }
