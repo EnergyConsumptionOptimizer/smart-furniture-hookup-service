@@ -21,7 +21,7 @@ describe("Smart furniture hookup domain", () => {
       factory = new SmartFurnitureHookupFactory();
     });
 
-    it("should create a gas type of Smart furniture hookup", () => {
+    it("should create a gas type of smart furniture hookup", () => {
       const gasSmartFurnitureHookup = factory.createSmartFurnitureHookup(
         "Smart Stove",
         ConsumptionType.GAS,
@@ -36,7 +36,7 @@ describe("Smart furniture hookup domain", () => {
       );
     });
 
-    it("should create a water type of Smart furniture hookup", () => {
+    it("should create a water type of smart furniture hookup", () => {
       const gasSmartFurnitureHookup = factory.createSmartFurnitureHookup(
         "Smart Sink",
         ConsumptionType.WATER,
@@ -51,7 +51,7 @@ describe("Smart furniture hookup domain", () => {
       );
     });
 
-    it("should create a electric type of Smart furniture hookup", () => {
+    it("should create a electric type of smart furniture hookup", () => {
       const gasSmartFurnitureHookup = factory.createSmartFurnitureHookup(
         "Smart Lamp",
         ConsumptionType.ELECTRICITY,
