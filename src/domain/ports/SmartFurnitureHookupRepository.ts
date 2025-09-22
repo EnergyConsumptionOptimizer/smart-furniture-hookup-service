@@ -20,7 +20,6 @@ export interface SmartFurnitureHookupRepository {
    *          or `null`  if no smart furniture hookup exists with the given ID.
    *
    * @throws InvalidIDError
-   * @throws SmartFurnitureHookupNotFoundError
    */
   findSmartFurnitureHookupByID(
     id: SmartFurnitureHookupID,

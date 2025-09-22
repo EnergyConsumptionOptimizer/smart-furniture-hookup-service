@@ -19,7 +19,6 @@ export interface SmartFurnitureHookupService {
    * @returns A promise that resolves to the smart furniture hookup if found, or `null` otherwise.
    *
    * @throws InvalidIDError
-   * @throws SmartFurnitureHookupNotFoundError
    */
   getSmartFurnitureHookup(
     id: SmartFurnitureHookupID,
