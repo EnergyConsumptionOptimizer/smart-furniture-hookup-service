@@ -102,6 +102,8 @@ export class InMemorySmartFurnitureHookupRepository
   }
 
   async removeSmartFurnitureHookup(id: SmartFurnitureHookupID): Promise<void> {
+    this.validateSmartFurnitureHookupID(id);
+
     const smartFurnitureHookupIndex = this.smartFurnitureHookup.findIndex(
       (sfh) => sfh.id.value === id.value,
     );
