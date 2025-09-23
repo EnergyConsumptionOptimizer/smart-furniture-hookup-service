@@ -10,7 +10,7 @@ export function smartFurnitureHookupRoutes(
 
   router.get(
     "/",
-    authMiddleware.authenticateAdmin,
+    authMiddleware.authenticate,
     smartFurnitureHookupController.getSmartFurnitureHookups,
   );
   router.post(
