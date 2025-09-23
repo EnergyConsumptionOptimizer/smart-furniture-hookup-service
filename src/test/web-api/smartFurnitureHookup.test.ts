@@ -78,7 +78,7 @@ describe("Smart Furniture Hookup REST API", () => {
   describe("POST / - Create sfh", () => {
     const createNewSmartFurnitureHookupRequest = async (sfh?: {
       name?: string;
-      type?: ConsumptionType;
+      type?: ConsumptionType | string;
       endpoint?: string;
     }) => request(app).post(url).send(sfh);
 
@@ -126,6 +126,7 @@ describe("Smart Furniture Hookup REST API", () => {
         type: undefined,
         endpoint: newSmartFurnitureHookup.endpoint,
       });
+
       const responseEndpoint = await createNewSmartFurnitureHookupRequest({
         name: newSmartFurnitureHookup.name,
         type: newSmartFurnitureHookup.consumption.type,
@@ -135,6 +136,16 @@ describe("Smart Furniture Hookup REST API", () => {
       expect(responseName.status).toBe(400);
       expect(responseType.status).toBe(400);
       expect(responseEndpoint.status).toBe(400);
+    });
+
+    it("should return 400 status code when the consumption type provided doesn't exist", async () => {
+      const response = await createNewSmartFurnitureHookupRequest({
+        name: newSmartFurnitureHookup.name,
+        type: "energy",
+        endpoint: newSmartFurnitureHookup.endpoint,
+      });
+
+      expect(response.status).toBe(400);
     });
 
     it("should return 409 when name or endpoint are already exists", async () => {
