@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import {
+  InvalidConsumptionTypeError,
   InvalidIDError,
   SmartFurnitureHookupEndpointConflictError,
   SmartFurnitureHookupNameConflictError,
@@ -19,6 +20,10 @@ export const errorHandler = (
   void next;
 
   if (error instanceof InvalidIDError) {
+    return response.status(400).json(msgError(error.message));
+  }
+
+  if (error instanceof InvalidConsumptionTypeError) {
     return response.status(400).json(msgError(error.message));
   }
 

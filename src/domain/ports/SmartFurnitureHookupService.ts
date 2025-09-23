@@ -33,6 +33,7 @@ export interface SmartFurnitureHookupService {
    *
    * @throws SmartFurnitureHookupNameConflictError
    * @throws SmartFurnitureHookupEndpointConflictError
+   * @throws InvalidConsumptionTypeError
    */
   createSmartFurnitureHookup(
     name: string,
