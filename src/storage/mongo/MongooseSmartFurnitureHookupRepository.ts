@@ -40,11 +40,10 @@ export class MongooseSmartFurnitureHookupRepository
 
     try {
       const smartFurnitureHookupDocument = new SmartFurnitureHookupModel({
+        ...smartFurnitureHookup,
         _id: id,
-        name: smartFurnitureHookup.name,
         consumptionType: smartFurnitureHookup.consumption.type,
         consumptionUnit: smartFurnitureHookup.consumption.unit,
-        endpoint: smartFurnitureHookup.endpoint,
       });
 
       return this.mapSmartFurnitureHookupDocumentToDomain(
