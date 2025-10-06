@@ -1,5 +1,5 @@
 {
-  "name": "template-for-typescript-projects",
+  "name": "smart-furniture-hookup-service",
   "scripts": {
     "clean": "rimraf dist",
     "build": "tsc",
