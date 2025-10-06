@@ -14,6 +14,7 @@ import {
   SmartFurnitureHookupNotFoundError,
 } from "../../domain/errors/errors";
 import { MongoServerError } from "mongodb";
+import { FlattenMaps } from "mongoose";
 
 export class MongooseSmartFurnitureHookupRepository
   implements SmartFurnitureHookupRepository
@@ -46,7 +47,7 @@ export class MongooseSmartFurnitureHookupRepository
         consumptionUnit: smartFurnitureHookup.consumption.unit,
       });
 
-      return this.mapSmartFurnitureHookupDocumentToDomain(
+      return this.mapToSmartFurnitureHookup(
         await smartFurnitureHookupDocument.save(),
       );
     } catch (error) {
@@ -66,9 +67,7 @@ export class MongooseSmartFurnitureHookupRepository
       .lean()
       .exec();
 
-    return smartFurnitureHookupDocuments.map((doc) =>
-      this.mapSmartFurnitureHookupDocumentToDomain(doc),
-    );
+    return smartFurnitureHookupDocuments.map(this.mapToSmartFurnitureHookup);
   }
 
   async findSmartFurnitureHookupByID(
@@ -83,9 +82,7 @@ export class MongooseSmartFurnitureHookupRepository
       return null;
     }
 
-    return this.mapSmartFurnitureHookupDocumentToDomain(
-      smartFurnitureHookupDocument,
-    );
+    return this.mapToSmartFurnitureHookup(smartFurnitureHookupDocument);
   }
 
   async updateSmartFurnitureHookup(
@@ -118,7 +115,7 @@ export class MongooseSmartFurnitureHookupRepository
       throw new SmartFurnitureHookupNotFoundError();
     }
 
-    return this.mapSmartFurnitureHookupDocumentToDomain(updatedDocument);
+    return this.mapToSmartFurnitureHookup(updatedDocument);
   }
 
   async removeSmartFurnitureHookup(id: SmartFurnitureHookupID): Promise<void> {
@@ -131,8 +128,13 @@ export class MongooseSmartFurnitureHookupRepository
     }
   }
 
-  private mapSmartFurnitureHookupDocumentToDomain(
-    document: SmartFurnitureHookupDocument,
+  private mapToSmartFurnitureHookup(
+    document:
+      | (FlattenMaps<SmartFurnitureHookupDocument> &
+          Required<{
+            _id: string;
+          }>)
+      | SmartFurnitureHookupDocument,
   ): SmartFurnitureHookup {
     const consumption: Consumption = {
       type: consumptionTypeFromString(document.consumptionType),
