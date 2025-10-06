@@ -44,7 +44,7 @@ describe("SmartFurnitureHookupService", () => {
           smartFurnitureHookup.endpoint,
         );
       expect(result.id.value).not.toBe("");
-      expect(result.name, smartFurnitureHookup.name);
+      expect(result.name).toBe(smartFurnitureHookup.name);
       expect(result.consumption.type).toBe(
         smartFurnitureHookup.consumption.type,
       );
