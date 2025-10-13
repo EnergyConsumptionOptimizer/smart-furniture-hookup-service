@@ -78,11 +78,9 @@ export class MongooseSmartFurnitureHookupRepository
     const smartFurnitureHookupDocument =
       await SmartFurnitureHookupModel.findById(id.value).lean().exec();
 
-    if (!smartFurnitureHookupDocument) {
-      return null;
-    }
-
-    return this.mapToSmartFurnitureHookup(smartFurnitureHookupDocument);
+    return smartFurnitureHookupDocument
+      ? this.mapToSmartFurnitureHookup(smartFurnitureHookupDocument)
+      : null;
   }
 
   async updateSmartFurnitureHookup(
@@ -119,6 +117,8 @@ export class MongooseSmartFurnitureHookupRepository
   }
 
   async removeSmartFurnitureHookup(id: SmartFurnitureHookupID): Promise<void> {
+    this.validateSmartFurnitureHookupID(id.value);
+
     const result = await SmartFurnitureHookupModel.findByIdAndDelete(
       id.value,
     ).exec();
