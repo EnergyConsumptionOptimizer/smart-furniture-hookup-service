@@ -10,7 +10,6 @@ import {
 } from "../storage/mockSmartFurnitureHookup";
 import { app } from "./app";
 import { SmartFurnitureHookupID } from "../../domain/SmartFurnitureHookupID";
-import { ConsumptionType } from "../../domain/ConsumptionType";
 
 describe("Smart Furniture Hookup REST API", () => {
   const url = "/api/smart-furniture-hookups";
@@ -30,7 +29,7 @@ describe("Smart Furniture Hookup REST API", () => {
   describe("GET / - List of smart furniture hookup", () => {
     const getAllRequest = async () => request(app).get(url);
 
-    it("should return sfh list when requested ", async () => {
+    it("should return smart furniture hookup list when requested ", async () => {
       const response = await getAllRequest();
 
       expect(response.status).toBe(200);
@@ -53,11 +52,8 @@ describe("Smart Furniture Hookup REST API", () => {
       expect(response.status).toBe(200);
       expect(response.body["id"]).toBe(smartFridge.id.value);
       expect(response.body["name"]).toBe(smartFridge.name);
-      expect(response.body["type"].toLowerCase()).toBe(
-        smartFridge.consumption.type.toLowerCase(),
-      );
-      expect(response.body["consumptionUnit"]).toBe(
-        smartFridge.consumption.unit,
+      expect(response.body["utilityType"].toLowerCase()).toBe(
+        smartFridge.utilityType.toLowerCase(),
       );
       expect(response.body["endpoint"]).toBe(smartFridge.endpoint);
     });
@@ -75,29 +71,25 @@ describe("Smart Furniture Hookup REST API", () => {
     });
   });
 
-  describe("POST / - Create sfh", () => {
+  describe("POST / - Create smart furniture hookup", () => {
     const createNewSmartFurnitureHookupRequest = async (sfh?: {
       name?: string;
-      type?: ConsumptionType | string;
+      utilityType?: string;
       endpoint?: string;
     }) => request(app).post(url).send(sfh);
 
     const newSmartFurnitureHookup = mockSmartFurnitureHookupKitchenSink;
 
-    it("should create sfh when provided valid name, type and endpoint", async () => {
+    it("should create smart furniture hookup when provided valid name, utility type and endpoint", async () => {
       const response = await createNewSmartFurnitureHookupRequest({
         ...newSmartFurnitureHookup,
-        type: newSmartFurnitureHookup.consumption.type,
       });
 
       expect(response.status).toBe(201);
 
       expect(response.body["name"]).toBe(newSmartFurnitureHookup.name);
-      expect(response.body["type"].toLowerCase()).toBe(
-        newSmartFurnitureHookup.consumption.type.toLowerCase(),
-      );
-      expect(response.body["consumptionUnit"].toLowerCase()).toBe(
-        newSmartFurnitureHookup.consumption.unit.toLowerCase(),
+      expect(response.body["utilityType"].toLowerCase()).toBe(
+        newSmartFurnitureHookup.utilityType.toLowerCase(),
       );
       expect(response.body["endpoint"]).toBe(
         newSmartFurnitureHookup.endpoint.toLowerCase(),
@@ -117,19 +109,19 @@ describe("Smart Furniture Hookup REST API", () => {
     it("should return 400 status code when required data are not provided", async () => {
       const responseName = await createNewSmartFurnitureHookupRequest({
         name: undefined,
-        type: newSmartFurnitureHookup.consumption.type,
+        utilityType: newSmartFurnitureHookup.utilityType,
         endpoint: newSmartFurnitureHookup.endpoint,
       });
 
       const responseType = await createNewSmartFurnitureHookupRequest({
         name: newSmartFurnitureHookup.name,
-        type: undefined,
+        utilityType: undefined,
         endpoint: newSmartFurnitureHookup.endpoint,
       });
 
       const responseEndpoint = await createNewSmartFurnitureHookupRequest({
         name: newSmartFurnitureHookup.name,
-        type: newSmartFurnitureHookup.consumption.type,
+        utilityType: newSmartFurnitureHookup.utilityType,
         endpoint: undefined,
       });
 
@@ -141,7 +133,7 @@ describe("Smart Furniture Hookup REST API", () => {
     it("should return 400 status code when the consumption type provided doesn't exist", async () => {
       const response = await createNewSmartFurnitureHookupRequest({
         name: newSmartFurnitureHookup.name,
-        type: "energy",
+        utilityType: "energy",
         endpoint: newSmartFurnitureHookup.endpoint,
       });
 
@@ -151,13 +143,12 @@ describe("Smart Furniture Hookup REST API", () => {
     it("should return 409 when name or endpoint are already exists", async () => {
       const responseName = await createNewSmartFurnitureHookupRequest({
         ...newSmartFurnitureHookup,
-        type: newSmartFurnitureHookup.consumption.type,
+        utilityType: newSmartFurnitureHookup.utilityType,
         name: smartFridge.name,
       });
 
       const responseEndpoint = await createNewSmartFurnitureHookupRequest({
         ...newSmartFurnitureHookup,
-        type: newSmartFurnitureHookup.consumption.type,
         endpoint: smartFridge.endpoint,
       });
 

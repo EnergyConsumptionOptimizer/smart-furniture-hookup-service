@@ -1,10 +1,10 @@
 import { SmartFurnitureHookupService } from "../domain/ports/SmartFurnitureHookupService";
-import { consumptionTypeFromString } from "../domain/ConsumptionType";
 import { SmartFurnitureHookup } from "../domain/SmartFurnitureHookup";
 import { SmartFurnitureHookupID } from "../domain/SmartFurnitureHookupID";
 import { SmartFurnitureHookupRepository } from "../domain/ports/SmartFurnitureHookupRepository";
 import { SmartFurnitureHookupFactory } from "../domain/SmartFurnitureHookupFactory";
 import { SmartFurnitureHookupNotFoundError } from "../domain/errors/errors";
+import { utilityTypeFromString } from "../domain/UtilityType";
 
 export class SmartFurnitureHookupServiceImpl
   implements SmartFurnitureHookupService
@@ -18,12 +18,10 @@ export class SmartFurnitureHookupServiceImpl
     type: string,
     endpoint: string,
   ): Promise<SmartFurnitureHookup> {
-    const consumptionType = consumptionTypeFromString(type);
-
     return this.smartFurnitureHookupRepository.addSmartFurnitureHookup(
       new SmartFurnitureHookupFactory().createSmartFurnitureHookup(
         name,
-        consumptionType,
+        utilityTypeFromString(type),
         endpoint,
       ),
     );

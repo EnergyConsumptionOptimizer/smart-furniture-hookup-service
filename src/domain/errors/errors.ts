@@ -26,16 +26,9 @@ export class InvalidIDError extends Error {
   }
 }
 
-export class InvalidConsumptionTypeError extends Error {
+export class InvalidUtilityTypeError extends Error {
   constructor(type: string) {
-    super(`Invalid consumption type: ${type}`);
-    this.name = "InvalidConsumptionTypeError";
-  }
-}
-
-export class InvalidConsumptionUnitError extends Error {
-  constructor(unit: string) {
-    super(`Invalid consumption unit: ${unit}`);
-    this.name = "InvalidConsumptionUnitError";
+    super(`Invalid utility type: ${type}`);
+    this.name = "InvalidUtilityTypeError";
   }
 }

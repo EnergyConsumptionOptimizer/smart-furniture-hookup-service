@@ -3,9 +3,6 @@ import { SmartFurnitureHookup } from "../../domain/SmartFurnitureHookup";
 import { SmartFurnitureHookupID } from "../../domain/SmartFurnitureHookupID";
 import { v4 as uuidv4, validate } from "uuid";
 import { SmartFurnitureHookupDocument } from "./mongoose/SmartFurnitureHookupDocument";
-import { consumptionTypeFromString } from "../../domain/ConsumptionType";
-import { Consumption } from "../../domain/Consumption";
-import { consumptionUnitFromString } from "../../domain/ConsumptionUnit";
 import { SmartFurnitureHookupModel } from "./mongoose/SmartFurnitureHookupModel";
 import {
   InvalidIDError,
@@ -43,8 +40,6 @@ export class MongooseSmartFurnitureHookupRepository
       const smartFurnitureHookupDocument = new SmartFurnitureHookupModel({
         ...smartFurnitureHookup,
         _id: id,
-        consumptionType: smartFurnitureHookup.consumption.type,
-        consumptionUnit: smartFurnitureHookup.consumption.unit,
       });
 
       return this.mapToSmartFurnitureHookup(
@@ -136,15 +131,10 @@ export class MongooseSmartFurnitureHookupRepository
           }>)
       | SmartFurnitureHookupDocument,
   ): SmartFurnitureHookup {
-    const consumption: Consumption = {
-      type: consumptionTypeFromString(document.consumptionType),
-      unit: consumptionUnitFromString(document.consumptionUnit),
-    };
-
     return {
       id: { value: document._id },
       name: document.name,
-      consumption: consumption,
+      utilityType: document.utilityType,
       endpoint: document.endpoint,
     };
   }

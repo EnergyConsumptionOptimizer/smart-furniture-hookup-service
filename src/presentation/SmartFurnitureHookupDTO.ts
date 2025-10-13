@@ -3,8 +3,7 @@ import { SmartFurnitureHookup } from "../domain/SmartFurnitureHookup";
 export interface SmartFurnitureHookupDTO {
   id: string;
   name: string;
-  type: string;
-  consumptionUnit: string;
+  utilityType: string;
   endpoint: string;
 }
 
@@ -13,8 +12,7 @@ export const smartFurnitureHookupDTOMapper = {
     return {
       id: smartFurnitureHookup.id.value,
       name: smartFurnitureHookup.name,
-      type: smartFurnitureHookup.consumption.type.toLowerCase(),
-      consumptionUnit: smartFurnitureHookup.consumption.unit,
+      utilityType: smartFurnitureHookup.utilityType,
       endpoint: smartFurnitureHookup.endpoint,
     };
   },

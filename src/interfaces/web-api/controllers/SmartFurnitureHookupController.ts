@@ -62,19 +62,19 @@ export class SmartFurnitureHookupController {
         return;
       }
 
-      const { name, type, endpoint } = request.body;
+      const { name, utilityType, endpoint } = request.body;
 
-      if (!name || !type || !endpoint) {
+      if (!name || !utilityType || !endpoint) {
         response
           .status(400)
-          .json({ error: "name, type and endpoint are required" });
+          .json({ error: "name, utility type and endpoint are required" });
         return;
       }
 
       const smartFurnitureHookup =
         await this.smartFurnitureHookupService.createSmartFurnitureHookup(
           name,
-          type,
+          utilityType,
           endpoint,
         );
 

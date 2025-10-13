@@ -1,9 +1,9 @@
-import { Consumption } from "./Consumption";
 import { SmartFurnitureHookupID } from "./SmartFurnitureHookupID";
+import { UtilityType } from "./UtilityType";
 
 export interface SmartFurnitureHookup {
   id: SmartFurnitureHookupID;
   name: string;
-  consumption: Consumption;
+  utilityType: UtilityType;
   endpoint: string;
 }

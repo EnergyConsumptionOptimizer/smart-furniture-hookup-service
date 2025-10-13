@@ -12,11 +12,7 @@ const smartFurnitureHookupSchema = new Schema<SmartFurnitureHookupDocument>(
       required: true,
       unique: true,
     },
-    consumptionType: {
-      type: String,
-      required: true,
-    },
-    consumptionUnit: {
+    utilityType: {
       type: String,
       required: true,
     },

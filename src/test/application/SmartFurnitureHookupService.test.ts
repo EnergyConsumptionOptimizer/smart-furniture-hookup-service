@@ -40,17 +40,12 @@ describe("SmartFurnitureHookupService", () => {
       const result =
         await smartFurnitureHookupService.createSmartFurnitureHookup(
           smartFurnitureHookup.name,
-          smartFurnitureHookup.consumption.type,
+          smartFurnitureHookup.utilityType,
           smartFurnitureHookup.endpoint,
         );
       expect(result.id.value).not.toBe("");
       expect(result.name).toBe(smartFurnitureHookup.name);
-      expect(result.consumption.type).toBe(
-        smartFurnitureHookup.consumption.type,
-      );
-      expect(result.consumption.unit).toBe(
-        smartFurnitureHookup.consumption.unit,
-      );
+      expect(result.utilityType).toBe(smartFurnitureHookup.utilityType);
     });
 
     it("should throw SmartFurnitureHookupNameConflictError when name conflicts", async () => {
@@ -63,7 +58,7 @@ describe("SmartFurnitureHookupService", () => {
       await expect(
         smartFurnitureHookupService.createSmartFurnitureHookup(
           existingSmartFurnitureHookup.name,
-          smartFurnitureHookup.consumption.type,
+          smartFurnitureHookup.utilityType,
           smartFurnitureHookup.endpoint,
         ),
       ).rejects.toThrow(SmartFurnitureHookupNameConflictError);
@@ -79,7 +74,7 @@ describe("SmartFurnitureHookupService", () => {
       await expect(
         smartFurnitureHookupService.createSmartFurnitureHookup(
           smartFurnitureHookup.name,
-          smartFurnitureHookup.consumption.type,
+          smartFurnitureHookup.utilityType,
           existingSmartFurnitureHookup.endpoint,
         ),
       ).rejects.toThrow(SmartFurnitureHookupEndpointConflictError);
@@ -120,9 +115,7 @@ describe("SmartFurnitureHookupService", () => {
 
       expect(result).not.toBeNull();
       expect(result?.name).toBe(smartFurnitureHookup.name);
-      expect(result?.consumption.type).toBe(
-        smartFurnitureHookup.consumption.type,
-      );
+      expect(result?.utilityType).toBe(smartFurnitureHookup.utilityType);
     });
 
     it("should return null when ID does not exist", async () => {
