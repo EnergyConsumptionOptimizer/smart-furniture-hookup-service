@@ -2,6 +2,7 @@ import { SmartFurnitureHookupController } from "../controllers/SmartFurnitureHoo
 import { Router } from "express";
 import { smartFurnitureHookupRoutes } from "./smartFurnitureHookupRoutes";
 import { AuthMiddleware } from "../middlewares/AuthMiddleware";
+import { internalRoutes } from "./internal/internalRoutes";
 
 export function router(
   smartFurnitureHookupController: SmartFurnitureHookupController,
@@ -13,6 +14,8 @@ export function router(
     "/api/smart-furniture-hookups",
     smartFurnitureHookupRoutes(smartFurnitureHookupController, authMiddleware),
   );
+
+  router.use("/api/internal", internalRoutes(smartFurnitureHookupController));
 
   return router;
 }
