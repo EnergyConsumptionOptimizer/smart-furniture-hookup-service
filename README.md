@@ -1,2 +1,2 @@
-# Template-for-TypeScript-projects
-A template repository for kickstarting the development of Typescript projects
+# Smart Furniture Hookup Service
+E.C.O. smart furniture hookup service repository.
