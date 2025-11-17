@@ -7,6 +7,8 @@ import {
   SmartFurnitureHookupNotFoundError,
 } from "@domain/errors/errors";
 import axios from "axios";
+import { InvalidTokenError } from "@interfaces/web-api/middlewares/authMiddewareErrors";
+import { ZodError } from "zod";
 
 const msgError = (message: string) => {
   return { error: message };
@@ -19,6 +21,19 @@ export const errorHandler = (
   next: NextFunction,
 ) => {
   void next;
+
+  if (error instanceof ZodError) {
+    return response.status(400).json({
+      error: "ValidationError",
+      message: "Invalid request payload",
+      code: "VALIDATION_ERROR",
+      details: error.issues.map((issue) => ({
+        path: issue.path.join("."),
+        message: issue.message,
+        code: issue.code,
+      })),
+    });
+  }
 
   if (error instanceof InvalidIDError) {
     return response.status(400).json(msgError(error.message));
