@@ -1,5 +1,6 @@
 import { type NextFunction, type Request, type Response } from "express";
 import axios from "axios";
+import { InvalidTokenError } from "@interfaces/web-api/middlewares/authMiddewareErrors";
 
 export class AuthMiddleware {
   private checkToken = (request: Request) => {
