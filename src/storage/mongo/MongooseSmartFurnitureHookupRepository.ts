@@ -11,7 +11,6 @@ import {
   SmartFurnitureHookupNotFoundError,
 } from "@domain/errors/errors";
 import { MongoServerError } from "mongodb";
-import { FlattenMaps } from "mongoose";
 
 export class MongooseSmartFurnitureHookupRepository
   implements SmartFurnitureHookupRepository
@@ -124,12 +123,10 @@ export class MongooseSmartFurnitureHookupRepository
   }
 
   private mapToSmartFurnitureHookup(
-    document:
-      | (FlattenMaps<SmartFurnitureHookupDocument> &
-          Required<{
-            _id: string;
-          }>)
-      | SmartFurnitureHookupDocument,
+    document: Pick<
+      SmartFurnitureHookupDocument,
+      "_id" | "name" | "utilityType" | "endpoint"
+    >,
   ): SmartFurnitureHookup {
     return {
       id: { value: document._id },
