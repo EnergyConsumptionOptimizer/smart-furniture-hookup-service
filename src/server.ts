@@ -1,16 +1,6 @@
 import "dotenv/config";
-import express from "express";
 import mongoose from "mongoose";
-import { apiRouter } from "@interfaces/web-api/dependencies";
-import { errorHandler } from "@interfaces/web-api/middlewares/errorHandlerMiddleware";
-
-const app = express();
-
-app.use(express.json());
-
-app.use(apiRouter);
-
-app.use(errorHandler);
+import app from "./app";
 
 const config = {
   port: process.env.PORT || 3000,
