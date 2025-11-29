@@ -16,7 +16,11 @@ export const createSmartFurnitureHookupSchema = z.object({
   endpoint: endpointSchema,
 });
 
-export const updateSmartFurnitureHookupSchema = z.object({
-  name: nameSchema,
-  endpoint: endpointSchema,
-});
+export const updateSmartFurnitureHookupSchema = z
+  .object({
+    name: nameSchema.optional(),
+    endpoint: endpointSchema.optional(),
+  })
+  .refine((data) => data.name !== undefined || data.endpoint !== undefined, {
+    message: "At least one of 'name' or 'endpoint' is required.",
+  });
