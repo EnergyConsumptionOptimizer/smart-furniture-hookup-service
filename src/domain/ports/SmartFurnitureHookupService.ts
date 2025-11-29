@@ -55,8 +55,8 @@ export interface SmartFurnitureHookupService {
    */
   updateSmartFurnitureHookup(
     id: SmartFurnitureHookupID,
-    name: string,
-    endpoint: string,
+    name?: string,
+    endpoint?: string,
   ): Promise<SmartFurnitureHookup>;
 
   /**
