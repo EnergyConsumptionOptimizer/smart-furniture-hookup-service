@@ -12,9 +12,7 @@ import {
 } from "@domain/errors/errors";
 import { MongoServerError } from "mongodb";
 
-export class MongooseSmartFurnitureHookupRepository
-  implements SmartFurnitureHookupRepository
-{
+export class MongooseSmartFurnitureHookupRepository implements SmartFurnitureHookupRepository {
   private handleMongoSmartFurnitureHookupConflict(
     error: MongoServerError,
     smartFurnitureHookup: SmartFurnitureHookup,

@@ -6,9 +6,7 @@ import { SmartFurnitureHookupFactory } from "@domain/SmartFurnitureHookupFactory
 import { SmartFurnitureHookupID } from "@domain/SmartFurnitureHookupID";
 import { SmartFurnitureHookupNotFoundError } from "@domain/errors/errors";
 
-export class SmartFurnitureHookupServiceImpl
-  implements SmartFurnitureHookupService
-{
+export class SmartFurnitureHookupServiceImpl implements SmartFurnitureHookupService {
   constructor(
     private readonly smartFurnitureHookupRepository: SmartFurnitureHookupRepository,
   ) {}

@@ -9,9 +9,7 @@ import {
   SmartFurnitureHookupNotFoundError,
 } from "@domain/errors/errors";
 
-export class InMemorySmartFurnitureHookupRepository
-  implements SmartFurnitureHookupRepository
-{
+export class InMemorySmartFurnitureHookupRepository implements SmartFurnitureHookupRepository {
   private smartFurnitureHookup: SmartFurnitureHookup[] = [];
 
   private checkForConflicts(smartFurnitureHookup: SmartFurnitureHookup) {
