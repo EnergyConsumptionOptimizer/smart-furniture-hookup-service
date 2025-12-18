@@ -61,7 +61,7 @@
     "typescript": "^5.9.2",
     "vitest": "^4.0.0",
     "tsconfig-paths": "^4.2.0",
-    "vite-tsconfig-paths": "^5.1.4",
+    "vite-tsconfig-paths": "^6.0.0",
     "semantic-release-preconfigured-conventional-commits": "^1.1.152"
   }
 }
