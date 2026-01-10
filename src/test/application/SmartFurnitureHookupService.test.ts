@@ -17,6 +17,7 @@ import {
   mockSmartFurnitureHookupHeater,
   mockSmartFurnitureHookupLamp,
 } from "../storage/mockSmartFurnitureHookup";
+import { monitoringService } from "../interfaces/web-api/dependencies";
 
 describe("SmartFurnitureHookupService", () => {
   let repository: InMemorySmartFurnitureHookupRepository;
@@ -24,8 +25,10 @@ describe("SmartFurnitureHookupService", () => {
 
   beforeAll(() => {
     repository = new InMemorySmartFurnitureHookupRepository();
+
     smartFurnitureHookupService = new SmartFurnitureHookupServiceImpl(
       repository,
+      monitoringService,
     );
   });
 
