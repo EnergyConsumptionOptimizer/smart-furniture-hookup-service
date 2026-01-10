@@ -4,14 +4,18 @@ import { SmartFurnitureHookupController } from "./controllers/SmartFurnitureHook
 import { SmartFurnitureHookupServiceImpl } from "@application/SmartFurnitureHookupServiceImpl";
 import { AuthMiddleware } from "./middlewares/AuthMiddleware";
 import { MongooseSmartFurnitureHookupRepository } from "@storage/mongo/MongooseSmartFurnitureHookupRepository";
+import { MonitoringServiceImpl } from "@interfaces/MonitoringServiceImpl";
 
 // ===== Repository =====
 export const smartFurnitureHookupRepository =
   new MongooseSmartFurnitureHookupRepository();
 
 // ===== Services =====
+export const monitoringService = new MonitoringServiceImpl();
+
 export const smartFurnitureHookupService = new SmartFurnitureHookupServiceImpl(
   smartFurnitureHookupRepository,
+  monitoringService,
 );
 
 // ===== Controllers =====
