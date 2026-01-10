@@ -9,6 +9,7 @@ import {
 import axios from "axios";
 import { InvalidTokenError } from "@interfaces/web-api/middlewares/authMiddewareErrors";
 import { ZodError } from "zod";
+import { SmartFurnitureHookupEndpointConfigurationError } from "@application/erros";
 
 const msgError = (message: string) => {
   return { error: message };
@@ -33,6 +34,10 @@ export const errorHandler = (
         code: issue.code,
       })),
     });
+  }
+
+  if (error instanceof SmartFurnitureHookupEndpointConfigurationError) {
+    return response.status(502).json(msgError(error.message));
   }
 
   if (error instanceof InvalidIDError) {
