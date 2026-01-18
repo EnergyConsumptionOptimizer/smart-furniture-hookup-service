@@ -1,4 +1,7 @@
 import { NextFunction, Request, Response } from "express";
+import axios from "axios";
+import { ZodError } from "zod";
+
 import {
   InvalidUtilityTypeError,
   InvalidIDError,
@@ -6,14 +9,40 @@ import {
   SmartFurnitureHookupNameConflictError,
   SmartFurnitureHookupNotFoundError,
 } from "@domain/errors/errors";
-import axios from "axios";
+
 import { InvalidTokenError } from "@interfaces/web-api/middlewares/authMiddewareErrors";
-import { ZodError } from "zod";
 import { SmartFurnitureHookupEndpointConfigurationError } from "@application/erros";
 
-const msgError = (message: string) => {
-  return { error: message };
-};
+interface ErrorConfig {
+  status: number;
+  code: string;
+  field?: string;
+}
+
+const ERROR_MAP = new Map<string, ErrorConfig>([
+  [
+    SmartFurnitureHookupNameConflictError.name,
+    { status: 409, code: "CONFLICT", field: "name" },
+  ],
+  [
+    SmartFurnitureHookupEndpointConflictError.name,
+    { status: 409, code: "CONFLICT", field: "endpoint" },
+  ],
+  [
+    InvalidUtilityTypeError.name,
+    { status: 400, code: "VALIDATION_ERROR", field: "utilityType" },
+  ],
+  [InvalidIDError.name, { status: 400, code: "BAD_REQUEST" }],
+  [
+    SmartFurnitureHookupNotFoundError.name,
+    { status: 404, code: "RESOURCE_NOT_FOUND" },
+  ],
+  [
+    SmartFurnitureHookupEndpointConfigurationError.name,
+    { status: 502, code: "INFRASTRUCTURE_ERROR" },
+  ],
+  [InvalidTokenError.name, { status: 401, code: "UNAUTHORIZED" }],
+]);
 
 export const errorHandler = (
   error: Error,
@@ -24,51 +53,43 @@ export const errorHandler = (
   void next;
 
   if (error instanceof ZodError) {
+    const fieldErrors: Record<string, string> = {};
+
+    error.issues.forEach((issue) => {
+      fieldErrors[issue.path.join(".")] = issue.message;
+    });
+
     return response.status(400).json({
-      error: "ValidationError",
-      message: "Invalid request payload",
       code: "VALIDATION_ERROR",
-      details: error.issues.map((issue) => ({
-        path: issue.path.join("."),
-        message: issue.message,
-        code: issue.code,
-      })),
+      message: "Invalid request payload",
+      errors: fieldErrors,
     });
   }
 
-  if (error instanceof SmartFurnitureHookupEndpointConfigurationError) {
-    return response.status(502).json(msgError(error.message));
-  }
+  const config = ERROR_MAP.get(error.name);
 
-  if (error instanceof InvalidIDError) {
-    return response.status(400).json(msgError(error.message));
-  }
+  if (config) {
+    const errorsPayload = config.field ? { [config.field]: error.message } : {};
 
-  if (error instanceof InvalidUtilityTypeError) {
-    return response.status(400).json(msgError(error.message));
-  }
-
-  if (error instanceof SmartFurnitureHookupNotFoundError) {
-    return response.status(404).json(msgError(error.message));
-  }
-
-  if (
-    error instanceof SmartFurnitureHookupNameConflictError ||
-    error instanceof SmartFurnitureHookupEndpointConflictError
-  ) {
-    return response.status(409).json(msgError(error.message));
-  }
-
-  if (error instanceof InvalidTokenError) {
-    return response.status(403).json(msgError(error.message));
+    return response.status(config.status).json({
+      code: config.code,
+      message: config.field ? "Validation failed" : error.message,
+      errors: errorsPayload,
+    });
   }
 
   if (
     axios.isAxiosError(error) &&
     (error.response?.status === 401 || error.response?.status === 403)
   ) {
-    return response.status(error.response?.status).json(error.response?.data);
+    return response.status(error.response.status).json(error.response.data);
   }
 
-  return response.status(500).send();
+  console.error("Unhandled error:", error);
+
+  return response.status(500).json({
+    code: "INTERNAL_ERROR",
+    message: "Internal Server Error",
+    errors: {},
+  });
 };
