@@ -25,10 +25,12 @@ The Smart Furniture Hookup Service is responsible for managing smart furniture h
 ### Smart Furniture Hookup
 - `GET /api/smart-furniture-hookups`
 - `POST /api/smart-furniture-hookups`
-
 - `GET /api/smart-furniture-hookups/:id`
 - `PATCH /api/smart-furniture-hookups/:id`
 - `DELETE /api/smart-furniture-hookups/:id`
+
+### Internal
+- `GET /api/internal/smart-furniture-hookups/:id`
 
 ## Documentation
 Documentation of the typescript code base can be found at the [typedoc](https://energyconsumptionoptimizer.github.io/smart-furniture-hookup-service/).
