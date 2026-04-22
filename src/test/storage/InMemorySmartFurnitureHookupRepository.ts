@@ -1,4 +1,3 @@
-import { SmartFurnitureHookupRepository } from "@domain/ports/SmartFurnitureHookupRepository";
 import { SmartFurnitureHookup } from "@domain/SmartFurnitureHookup";
 import { SmartFurnitureHookupID } from "@domain/SmartFurnitureHookupID";
 import { v4 as uuidv4, validate } from "uuid";
@@ -7,7 +6,8 @@ import {
   SmartFurnitureHookupEndpointConflictError,
   SmartFurnitureHookupNameConflictError,
   SmartFurnitureHookupNotFoundError,
-} from "@domain/errors/errors";
+} from "@domain/errors";
+import { SmartFurnitureHookupRepository } from "@application/outbound/SmartFurnitureHookupRepository";
 
 export class InMemorySmartFurnitureHookupRepository implements SmartFurnitureHookupRepository {
   private smartFurnitureHookup: SmartFurnitureHookup[] = [];

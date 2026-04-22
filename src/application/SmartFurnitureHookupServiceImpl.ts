@@ -1,12 +1,13 @@
-import { SmartFurnitureHookupService } from "@domain/ports/SmartFurnitureHookupService";
-import { SmartFurnitureHookupRepository } from "@domain/ports/SmartFurnitureHookupRepository";
 import { SmartFurnitureHookup } from "@domain/SmartFurnitureHookup";
 import { utilityTypeFromString } from "@domain/UtilityType";
 import { SmartFurnitureHookupFactory } from "@domain/SmartFurnitureHookupFactory";
 import { SmartFurnitureHookupID } from "@domain/SmartFurnitureHookupID";
-import { SmartFurnitureHookupNotFoundError } from "@domain/errors/errors";
-import { MonitoringService } from "@application/port/MonitoringService";
-import { SmartFurnitureHookupEndpointConfigurationError } from "@application/erros";
+
+import { SmartFurnitureHookupEndpointConfigurationError } from "@application/errors";
+import { SmartFurnitureHookupService } from "@application/inbound/SmartFurnitureHookupService";
+import { SmartFurnitureHookupRepository } from "@application/outbound/SmartFurnitureHookupRepository";
+import { MonitoringService } from "@application/outbound/MonitoringService";
+import { SmartFurnitureHookupNotFoundError } from "@domain/errors";
 
 export class SmartFurnitureHookupServiceImpl implements SmartFurnitureHookupService {
   constructor(

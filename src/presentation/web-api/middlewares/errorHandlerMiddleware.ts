@@ -8,10 +8,10 @@ import {
   SmartFurnitureHookupEndpointConflictError,
   SmartFurnitureHookupNameConflictError,
   SmartFurnitureHookupNotFoundError,
-} from "@domain/errors/errors";
+} from "@domain/errors";
 
-import { InvalidTokenError } from "@interfaces/web-api/middlewares/authMiddewareErrors";
-import { SmartFurnitureHookupEndpointConfigurationError } from "@application/erros";
+import { InvalidTokenError } from "@presentation/web-api/middlewares/authMiddewareErrors";
+import { SmartFurnitureHookupEndpointConfigurationError } from "@application/errors";
 
 interface ErrorConfig {
   status: number;

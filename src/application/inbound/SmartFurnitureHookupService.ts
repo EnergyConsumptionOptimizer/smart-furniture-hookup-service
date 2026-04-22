@@ -1,5 +1,5 @@
-import { SmartFurnitureHookup } from "../SmartFurnitureHookup";
-import { SmartFurnitureHookupID } from "../SmartFurnitureHookupID";
+import { SmartFurnitureHookup } from "@domain/SmartFurnitureHookup";
+import { SmartFurnitureHookupID } from "@domain/SmartFurnitureHookupID";
 
 /**
  * Service interface for managing smart furniture hookup.

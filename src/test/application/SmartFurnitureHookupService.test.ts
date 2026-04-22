@@ -1,23 +1,21 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { SmartFurnitureHookupService } from "@domain/ports/SmartFurnitureHookupService";
 import { InMemorySmartFurnitureHookupRepository } from "../storage/InMemorySmartFurnitureHookupRepository";
 import { SmartFurnitureHookupServiceImpl } from "@application/SmartFurnitureHookupServiceImpl";
-
 import { SmartFurnitureHookup } from "@domain/SmartFurnitureHookup";
-
 import { v4 as uuidv4 } from "uuid";
 import {
   InvalidIDError,
   SmartFurnitureHookupEndpointConflictError,
   SmartFurnitureHookupNameConflictError,
   SmartFurnitureHookupNotFoundError,
-} from "@domain/errors/errors";
+} from "@domain/errors";
 import {
   mockSmartFurnitureHookupFridge,
   mockSmartFurnitureHookupHeater,
   mockSmartFurnitureHookupLamp,
 } from "../storage/mockSmartFurnitureHookup";
 import { monitoringService } from "../interfaces/web-api/dependencies";
+import { SmartFurnitureHookupService } from "@application/inbound/SmartFurnitureHookupService";
 
 describe("SmartFurnitureHookupService", () => {
   let repository: InMemorySmartFurnitureHookupRepository;

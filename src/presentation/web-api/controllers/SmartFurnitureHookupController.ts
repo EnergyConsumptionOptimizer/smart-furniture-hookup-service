@@ -1,12 +1,12 @@
 import { NextFunction, type Request, type Response } from "express";
-import { SmartFurnitureHookupService } from "@domain/ports/SmartFurnitureHookupService";
 import { smartFurnitureHookupDTOMapper } from "@presentation/SmartFurnitureHookupDTO";
-import { SmartFurnitureHookupNotFoundError } from "@domain/errors/errors";
+import { SmartFurnitureHookupNotFoundError } from "@domain/errors";
 import {
   createSmartFurnitureHookupSchema,
   smartFurnitureHookupIDSchema,
   updateSmartFurnitureHookupSchema,
 } from "@presentation/SmartFurnitureHookupSchema";
+import { SmartFurnitureHookupService } from "@application/inbound/SmartFurnitureHookupService";
 
 export class SmartFurnitureHookupController {
   constructor(

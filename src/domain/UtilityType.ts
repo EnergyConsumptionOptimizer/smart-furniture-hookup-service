@@ -1,4 +1,4 @@
-import { InvalidUtilityTypeError } from "./errors/errors";
+import { InvalidUtilityTypeError } from "./errors";
 
 export enum UtilityType {
   GAS = "gas",

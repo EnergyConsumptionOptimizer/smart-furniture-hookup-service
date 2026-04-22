@@ -1,17 +1,17 @@
 import { InMemorySmartFurnitureHookupRepository } from "../../storage/InMemorySmartFurnitureHookupRepository";
 import { SmartFurnitureHookupServiceImpl } from "@application/SmartFurnitureHookupServiceImpl";
-import { SmartFurnitureHookupController } from "@interfaces/web-api/controllers/SmartFurnitureHookupController";
-import { router } from "@interfaces/web-api/routes/router";
-import { AuthMiddleware } from "@interfaces/web-api/middlewares/AuthMiddleware";
 import { vi } from "vitest";
-import { MonitoringServiceImpl } from "@interfaces/MonitoringServiceImpl";
+import { HTTPMonitoringService } from "@infrastructure/HTTPMonitoringService";
+import { SmartFurnitureHookupController } from "@presentation/web-api/controllers/SmartFurnitureHookupController";
+import { AuthMiddleware } from "@presentation/web-api/middlewares/AuthMiddleware";
+import { router } from "@presentation/web-api/routes/router";
 
 // ===== Repository =====
 export const smartFurnitureHookupRepository =
   new InMemorySmartFurnitureHookupRepository();
 
 // ===== Services =====
-export const monitoringService = new MonitoringServiceImpl();
+export const monitoringService = new HTTPMonitoringService();
 
 monitoringService.registerSmartFurnitureHookup = vi
   .fn()

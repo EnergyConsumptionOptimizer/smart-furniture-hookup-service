@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { smartFurnitureHookupRoutes } from "@interfaces/web-api/routes/smartFurnitureHookupRoutes";
-import { AuthMiddleware } from "@interfaces/web-api/middlewares/AuthMiddleware";
-import { SmartFurnitureHookupController } from "@interfaces/web-api/controllers/SmartFurnitureHookupController";
-import { internalRoutes } from "@interfaces/web-api/routes/internal/internalRoutes";
-import { healthCheck } from "@interfaces/web-api/routes/healthCheck";
+import { SmartFurnitureHookupController } from "@presentation/web-api/controllers/SmartFurnitureHookupController";
+import { AuthMiddleware } from "@presentation/web-api/middlewares/AuthMiddleware";
+import { healthCheck } from "@presentation/web-api/routes/healthCheck";
+import { smartFurnitureHookupRoutes } from "@presentation/web-api/routes/smartFurnitureHookupRoutes";
+import { internalRoutes } from "@presentation/web-api/routes/internal/internalRoutes";
 
 export function router(
   smartFurnitureHookupController: SmartFurnitureHookupController,

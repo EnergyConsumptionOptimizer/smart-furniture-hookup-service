@@ -1,8 +1,8 @@
 import express from "express";
-import { apiRouter } from "@interfaces/web-api/dependencies";
-import { errorHandler } from "@interfaces/web-api/middlewares/errorHandlerMiddleware";
 
 import cookieParser from "cookie-parser";
+import { errorHandler } from "@presentation/web-api/middlewares/errorHandlerMiddleware";
+import { apiRouter } from "./dependencies";
 const app = express();
 
 app.use(cookieParser());
