@@ -1,6 +1,7 @@
 import { MonitoringService } from "@application/outbound/MonitoringService";
-import { SmartFurnitureHookupID } from "@domain/SmartFurnitureHookupID";
+import { SmartFurnitureHookupID } from "@domain/values/SmartFurnitureHookupID";
 import axios from "axios";
+import { EndpointURL } from "@domain/values/EndpointURL";
 
 export class HTTPMonitoringService implements MonitoringService {
   private readonly MONITORING_SERVICE_URI =
@@ -9,7 +10,7 @@ export class HTTPMonitoringService implements MonitoringService {
 
   async registerSmartFurnitureHookup(
     id: SmartFurnitureHookupID,
-    endpoint: string,
+    endpoint: EndpointURL,
   ): Promise<void> {
     await axios.post(
       `${this.MONITORING_SERVICE_URI}/api/internal/registerSmartFurnitureHookup`,
@@ -20,7 +21,7 @@ export class HTTPMonitoringService implements MonitoringService {
     );
   }
 
-  async disconnectSmartFurnitureHookup(endpoint: string): Promise<void> {
+  async disconnectSmartFurnitureHookup(endpoint: EndpointURL): Promise<void> {
     await axios.post(
       `${this.MONITORING_SERVICE_URI}/api/internal/disconnectSmartFurnitureHookup`,
       {
