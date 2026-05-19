@@ -1,49 +1,58 @@
-import { SmartFurnitureHookup } from "@domain/SmartFurnitureHookup";
-import { SmartFurnitureHookupID } from "@domain/SmartFurnitureHookupID";
-import { v4 as uuidv4, validate } from "uuid";
-import { SmartFurnitureHookupDocument } from "./mongoose/SmartFurnitureHookupDocument";
-import { SmartFurnitureHookupModel } from "./mongoose/SmartFurnitureHookupModel";
+import { SmartFurnitureHookup } from "@domain/entities/SmartFurnitureHookup";
+import { SmartFurnitureHookupID } from "@domain/values/SmartFurnitureHookupID";
 import {
-  InvalidIDError,
-  SmartFurnitureHookupEndpointConflictError,
-  SmartFurnitureHookupNameConflictError,
-  SmartFurnitureHookupNotFoundError,
-} from "@domain/errors";
+  SmartFurnitureHookupMapper,
+  SmartFurnitureHookupModel,
+} from "./mongoose/SmartFurnitureHookupModel";
 import { MongoServerError } from "mongodb";
-import { SmartFurnitureHookupRepository } from "@application/outbound/SmartFurnitureHookupRepository";
+import { SmartFurnitureHookupRepository } from "@domain/ports/SmartFurnitureHookupRepository";
+import { Logger } from "pino";
+import {
+  NameAlreadyExistsError,
+  SmartFurnitureHookupNotFoundError,
+  UrlAlreadyExistsError,
+} from "@domain/errors";
+import { mongoSessionContext } from "@infrastructure/mongo/mongoSessionContext";
 
 export class MongooseSmartFurnitureHookupRepository implements SmartFurnitureHookupRepository {
+  readonly #logger?: Logger;
+
+  constructor(logger?: Logger) {
+    this.#logger = logger;
+  }
+
   private handleMongoSmartFurnitureHookupConflict(
     error: MongoServerError,
     smartFurnitureHookup: SmartFurnitureHookup,
   ) {
     if (Object.keys(error.keyPattern)[0] === "name")
-      throw new SmartFurnitureHookupNameConflictError(
-        smartFurnitureHookup.name,
-      );
-
+      throw new NameAlreadyExistsError(smartFurnitureHookup.name.toString());
     if (Object.keys(error.keyPattern)[0] === "endpoint")
-      throw new SmartFurnitureHookupEndpointConflictError(
-        smartFurnitureHookup.endpoint,
-      );
+      throw new UrlAlreadyExistsError(smartFurnitureHookup.endpoint.toString());
   }
 
   async saveSmartFurnitureHookup(
     smartFurnitureHookup: SmartFurnitureHookup,
   ): Promise<SmartFurnitureHookup> {
-    const id = uuidv4();
+    const session = mongoSessionContext.getStore();
 
     try {
-      const smartFurnitureHookupDocument = new SmartFurnitureHookupModel({
-        ...smartFurnitureHookup,
-        _id: id,
-      });
+      const smartFurnitureHookupDocument = new SmartFurnitureHookupModel(
+        SmartFurnitureHookupMapper.toPersistence(smartFurnitureHookup),
+      );
 
-      return this.mapToSmartFurnitureHookup(
-        await smartFurnitureHookupDocument.save(),
+      return SmartFurnitureHookupMapper.toDomain(
+        await smartFurnitureHookupDocument.save({
+          session: session,
+        }),
       );
     } catch (error) {
       if ((error as MongoServerError).code === 11000) {
+        this.#logger?.warn(
+          { smartFurnitureHookupId: smartFurnitureHookup.id.toString() },
+          "Concurrency conflict: duplicate key on save",
+        );
+
         this.handleMongoSmartFurnitureHookupConflict(
           error as MongoServerError,
           smartFurnitureHookup,
@@ -59,28 +68,28 @@ export class MongooseSmartFurnitureHookupRepository implements SmartFurnitureHoo
       .lean()
       .exec();
 
-    return smartFurnitureHookupDocuments.map(this.mapToSmartFurnitureHookup);
+    return smartFurnitureHookupDocuments.map(
+      SmartFurnitureHookupMapper.toDomain,
+    );
   }
 
   async findSmartFurnitureHookupByID(
     id: SmartFurnitureHookupID,
   ): Promise<SmartFurnitureHookup | null> {
-    this.validateSmartFurnitureHookupID(id.value);
-
     const smartFurnitureHookupDocument =
       await SmartFurnitureHookupModel.findById(id.value).lean().exec();
 
     return smartFurnitureHookupDocument
-      ? this.mapToSmartFurnitureHookup(smartFurnitureHookupDocument)
+      ? SmartFurnitureHookupMapper.toDomain(smartFurnitureHookupDocument)
       : null;
   }
 
   async updateSmartFurnitureHookup(
     smartFurnitureHookup: SmartFurnitureHookup,
-  ): Promise<SmartFurnitureHookup> {
-    this.validateSmartFurnitureHookupID(smartFurnitureHookup.id.value);
-
+  ): Promise<void> {
     let updatedDocument;
+
+    const session = mongoSessionContext.getStore();
 
     try {
       updatedDocument = await SmartFurnitureHookupModel.findByIdAndUpdate(
@@ -89,7 +98,10 @@ export class MongooseSmartFurnitureHookupRepository implements SmartFurnitureHoo
           name: smartFurnitureHookup.name,
           endpoint: smartFurnitureHookup.endpoint,
         },
-        { new: true, runValidators: true },
+        {
+          session,
+          runValidators: true,
+        },
       ).exec();
     } catch (error) {
       if ((error as MongoServerError).code === 11000) {
@@ -104,39 +116,16 @@ export class MongooseSmartFurnitureHookupRepository implements SmartFurnitureHoo
     if (!updatedDocument) {
       throw new SmartFurnitureHookupNotFoundError();
     }
-
-    return this.mapToSmartFurnitureHookup(updatedDocument);
   }
 
   async removeSmartFurnitureHookup(id: SmartFurnitureHookupID): Promise<void> {
-    this.validateSmartFurnitureHookupID(id.value);
-
-    const result = await SmartFurnitureHookupModel.findByIdAndDelete(
-      id.value,
-    ).exec();
+    const session = mongoSessionContext.getStore();
+    const result = await SmartFurnitureHookupModel.findByIdAndDelete(id.value, {
+      session,
+    }).exec();
 
     if (!result) {
       throw new SmartFurnitureHookupNotFoundError();
-    }
-  }
-
-  private mapToSmartFurnitureHookup(
-    document: Pick<
-      SmartFurnitureHookupDocument,
-      "_id" | "name" | "utilityType" | "endpoint"
-    >,
-  ): SmartFurnitureHookup {
-    return {
-      id: { value: document._id },
-      name: document.name,
-      utilityType: document.utilityType,
-      endpoint: document.endpoint,
-    };
-  }
-
-  private validateSmartFurnitureHookupID(value: string) {
-    if (!validate(value)) {
-      throw new InvalidIDError();
     }
   }
 }
