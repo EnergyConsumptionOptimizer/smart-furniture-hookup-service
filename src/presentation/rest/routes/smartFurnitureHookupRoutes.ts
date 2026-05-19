@@ -1,0 +1,44 @@
+import { Router } from "express";
+import { SmartFurnitureHookupController } from "../controllers/SmartFurnitureHookupController";
+import { AuthMiddleware } from "@presentation/rest/middlewares/AuthMiddleware";
+import { validate } from "@presentation/rest/middlewares/validate";
+import {
+  CreateSmartFurnitureHookupSchema,
+  SmartFurnitureHookupIdParamSchema,
+  UpdateSmartFurnitureHookupSchema,
+} from "@presentation/SmartFurnitureHookupSchema";
+import { UserRoles } from "@domain/values/UserRole";
+
+export function smartFurnitureHookupRoutes(
+  smartFurnitureHookupController: SmartFurnitureHookupController,
+  authMiddleware: AuthMiddleware,
+): Router {
+  const router = Router();
+
+  router.use(authMiddleware.forwardAuth);
+
+  router
+    .route("/")
+    .get((req, res) =>
+      smartFurnitureHookupController.getSmartFurnitureHookups(req, res),
+    )
+    .post(
+      authMiddleware.requireRole(UserRoles.ADMIN),
+      validate(CreateSmartFurnitureHookupSchema),
+      (req, res) =>
+        smartFurnitureHookupController.createSmartFurnitureHookup(req, res),
+    );
+  router
+    .route("/:id")
+    .get(validate(SmartFurnitureHookupIdParamSchema), (req, res) =>
+      smartFurnitureHookupController.getSmartFurnitureHookup(req, res),
+    )
+    .patch(validate(UpdateSmartFurnitureHookupSchema), (req, res) =>
+      smartFurnitureHookupController.updateSmartFurnitureHookup(req, res),
+    )
+    .delete(validate(SmartFurnitureHookupIdParamSchema), (req, res) =>
+      smartFurnitureHookupController.deleteSmartFurnitureHookup(req, res),
+    );
+
+  return router;
+}

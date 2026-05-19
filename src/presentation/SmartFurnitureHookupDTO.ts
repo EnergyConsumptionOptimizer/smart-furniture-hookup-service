@@ -1,4 +1,4 @@
-import { SmartFurnitureHookup } from "@domain/SmartFurnitureHookup";
+import { SmartFurnitureHookup } from "@domain/entities/SmartFurnitureHookup";
 
 export interface SmartFurnitureHookupDTO {
   id: string;
@@ -10,10 +10,10 @@ export interface SmartFurnitureHookupDTO {
 export const smartFurnitureHookupDTOMapper = {
   toDTO(smartFurnitureHookup: SmartFurnitureHookup): SmartFurnitureHookupDTO {
     return {
-      id: smartFurnitureHookup.id.value,
-      name: smartFurnitureHookup.name,
-      utilityType: smartFurnitureHookup.utilityType,
-      endpoint: smartFurnitureHookup.endpoint,
+      id: smartFurnitureHookup.id.toString(),
+      name: smartFurnitureHookup.name.toString(),
+      utilityType: smartFurnitureHookup.utilityType.toString(),
+      endpoint: smartFurnitureHookup.endpoint.toString(),
     };
   },
 };

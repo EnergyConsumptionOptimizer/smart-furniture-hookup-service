@@ -1,26 +1,26 @@
 import { z } from "zod";
-import { SmartFurnitureHookupID } from "@domain/SmartFurnitureHookupID";
 
-export const smartFurnitureHookupIDSchema = z
-  .string()
-  .nonempty()
-  .transform((value) => ({ value }) as SmartFurnitureHookupID);
+const smartFurnitureHookupId = z.string().nonempty();
+const name = z.string().nonempty();
+const utilityType = z.string().nonempty();
+const endpoint = z.string().nonempty();
 
-export const nameSchema = z.string().nonempty();
-export const utilityTypeSchema = z.string().nonempty();
-export const endpointSchema = z.string().nonempty();
-
-export const createSmartFurnitureHookupSchema = z.object({
-  name: nameSchema,
-  utilityType: utilityTypeSchema,
-  endpoint: endpointSchema,
+export const SmartFurnitureHookupIdParamSchema = z.object({
+  params: z.object({ id: smartFurnitureHookupId }),
 });
 
-export const updateSmartFurnitureHookupSchema = z
-  .object({
-    name: nameSchema.optional(),
-    endpoint: endpointSchema.optional(),
-  })
-  .refine((data) => data.name !== undefined || data.endpoint !== undefined, {
-    message: "At least one of 'name' or 'endpoint' is required.",
-  });
+export const CreateSmartFurnitureHookupSchema = z.object({
+  body: z.object({
+    name,
+    utilityType,
+    endpoint,
+  }),
+});
+
+export const UpdateSmartFurnitureHookupSchema = z.object({
+  params: z.object({ id: smartFurnitureHookupId }),
+  body: z.object({
+    name: name.optional(),
+    endpoint: endpoint.optional(),
+  }),
+});

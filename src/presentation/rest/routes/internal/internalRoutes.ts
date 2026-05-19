@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { smartFurnitureHookupRoutes } from "./smartFurnitureHookupRoutes";
-import { SmartFurnitureHookupController } from "@presentation/web-api/controllers/SmartFurnitureHookupController";
+import { SmartFurnitureHookupController } from "@presentation/rest/controllers/SmartFurnitureHookupController";
 
 export function internalRoutes(
   smartFurnitureHookupController: SmartFurnitureHookupController,
