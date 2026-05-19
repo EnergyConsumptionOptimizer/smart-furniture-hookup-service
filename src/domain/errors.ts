@@ -1,34 +1,106 @@
-export class SmartFurnitureHookupNameConflictError extends Error {
+export const DomainErrorCode = {
+  INVALID_ID_FORMAT: "INVALID_ID_FORMAT",
+  EMPTY_FIELD: "EMPTY_FIELD",
+  UNIQUE_FIELD_ALREADY_EXISTS: "UNIQUE_FIELD_ALREADY_EXISTS",
+  INVALID_UTILITY_TYPE: "INVALID_UTILITY_TYPE",
+  NOT_FOUND: "NOT_FOUND",
+} as const;
+
+export abstract class DomainError extends Error {
+  public abstract readonly code: string;
+
+  protected constructor(message: string) {
+    super(message);
+    this.name = this.constructor.name;
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+  }
+}
+
+// ==========================================
+// Empty Field Errors
+// ==========================================
+
+export abstract class EmptyFieldError extends DomainError {
+  public readonly code = DomainErrorCode.EMPTY_FIELD;
+
+  protected constructor(fieldName: string) {
+    super(`${fieldName} must not be empty`);
+  }
+}
+
+export class SmartFurnitureHookupNameEmptyError extends EmptyFieldError {
+  constructor() {
+    super("Smart furniture hookup name");
+  }
+}
+
+export class UrlEmptyError extends EmptyFieldError {
+  constructor() {
+    super("URL");
+  }
+}
+
+export class UtilityTypeEmptyError extends EmptyFieldError {
+  constructor() {
+    super("Utility type");
+  }
+}
+
+export class IdEmptyError extends EmptyFieldError {
+  constructor() {
+    super("ID");
+  }
+}
+
+// ==========================================
+// Unique Field Conflict Errors
+// ==========================================
+export abstract class UniqueFieldAlreadyExistsError extends DomainError {
+  public readonly code = DomainErrorCode.UNIQUE_FIELD_ALREADY_EXISTS;
+
+  protected constructor(fieldName: string, fieldValue: string) {
+    super(`${fieldName} ${fieldValue} already exists`);
+  }
+}
+
+export class NameAlreadyExistsError extends UniqueFieldAlreadyExistsError {
   constructor(name: string) {
-    super(`Name ${name} already exists`);
-    this.name = "SmartFurnitureHookupNameConflictError";
+    super("Name", name);
   }
 }
 
-export class SmartFurnitureHookupEndpointConflictError extends Error {
-  constructor(endpoint: string) {
-    super(`Endpoint ${endpoint} already exists`);
-    this.name = "SmartFurnitureHookupEndpointConflictError";
+export class UrlAlreadyExistsError extends UniqueFieldAlreadyExistsError {
+  constructor(url: string) {
+    super("URL", url);
   }
 }
 
-export class SmartFurnitureHookupNotFoundError extends Error {
+// ==========================================
+// Resource Not Found Errors
+// ==========================================
+
+export class NotFoundError extends DomainError {
+  public readonly code = DomainErrorCode.NOT_FOUND;
+  constructor(entityName = "Resource") {
+    super(`${entityName} not found`);
+  }
+}
+
+export class SmartFurnitureHookupNotFoundError extends NotFoundError {
   constructor() {
-    super("Smart furniture hookup not found");
-    this.name = "SmartFurnitureHookupNotFoundError";
+    super("Smart furniture hookup");
   }
 }
 
-export class InvalidIDError extends Error {
-  constructor() {
-    super("Invalid smart furniture hookup ID format");
-    this.name = "InvalidIDError";
-  }
-}
+// ==========================================
+// Other Domain Errors
+// ==========================================
 
-export class InvalidUtilityTypeError extends Error {
+export class InvalidUtilityTypeError extends DomainError {
+  public readonly code = DomainErrorCode.INVALID_UTILITY_TYPE;
   constructor(type: string) {
     super(`Invalid utility type: ${type}`);
-    this.name = "InvalidUtilityTypeError";
   }
 }

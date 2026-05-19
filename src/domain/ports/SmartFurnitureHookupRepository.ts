@@ -1,5 +1,5 @@
-import { SmartFurnitureHookupID } from "@domain/SmartFurnitureHookupID";
-import { SmartFurnitureHookup } from "@domain/SmartFurnitureHookup";
+import { SmartFurnitureHookupID } from "@domain/values/SmartFurnitureHookupID";
+import { SmartFurnitureHookup } from "@domain/entities/SmartFurnitureHookup";
 
 /**
  * Repository interface for managing and retrieving smart furniture hookup entities.
@@ -49,7 +49,7 @@ export interface SmartFurnitureHookupRepository {
    */
   updateSmartFurnitureHookup(
     smartFurnitureHookup: SmartFurnitureHookup,
-  ): Promise<SmartFurnitureHookup>;
+  ): Promise<void>;
 
   /**
    * Removes a smart furniture hookup from the repository.
