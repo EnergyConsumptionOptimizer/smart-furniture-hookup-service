@@ -20,6 +20,7 @@
       "@application/*": ["./application/*"],
       "@presentation/*": ["./presentation/*"],
       "@infrastructure/*": ["./infrastructure/*"],
+      "@test/*": ["./test/*"],
     }
   },
   "include": ["src/**/*"],

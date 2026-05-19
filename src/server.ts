@@ -1,37 +1,25 @@
 import "dotenv/config";
-import mongoose from "mongoose";
-import app from "./app";
+import { createLogger } from "./logger";
+import { config } from "./bootstrap/config";
+import { startInstrumentation } from "./instrumentation";
+import { connectMongo } from "./bootstrap/mongoConnection";
+import { composeApp } from "./bootstrap/composeApp";
+import { setupGracefulShutdown } from "./bootstrap/shutdown";
 
-const config = {
-  port: process.env.PORT || 3000,
-  mongoUri:
-    process.env.MONGO_URI ||
-    `mongodb://${process.env.MONGODB_HOST}:${process.env.MONGODB_PORT}/${process.env.MONGO_DB}`,
-};
+const rootLogger = createLogger(config);
+const logger = rootLogger.child({ component: "Server" });
+const sdk = startInstrumentation(rootLogger);
 
-if (!config.mongoUri) {
-  console.error("MONGO_URI is not defined in environment variables.");
-  process.exit(1);
+async function start(): Promise<void> {
+  await connectMongo(config.mongo.uri, logger);
+
+  const composed = composeApp(rootLogger);
+
+  const server = composed.app.listen(config.port, () => {
+    logger.info({ port: config.port }, "listening");
+  });
+
+  setupGracefulShutdown(server, composed, sdk, logger);
 }
 
-const connectDatabase = async () => {
-  try {
-    await mongoose.connect(config.mongoUri);
-    console.log("Connected to MongoDB");
-  } catch (err) {
-    console.error("Failed to connect to MongoDB:", err);
-    process.exit(1);
-  }
-};
-
-const launchServer = () => {
-  app.listen(config.port, () => {
-    console.log(`Server running on port ${config.port}`);
-  });
-};
-
-const start = () => {
-  connectDatabase().then(() => launchServer());
-};
-
-start();
+void start();
