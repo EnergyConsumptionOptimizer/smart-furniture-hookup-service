@@ -1,108 +1,192 @@
-import { SmartFurnitureHookup } from "@domain/SmartFurnitureHookup";
-import { utilityTypeFromString } from "@domain/UtilityType";
-import { SmartFurnitureHookupFactory } from "@domain/SmartFurnitureHookupFactory";
-import { SmartFurnitureHookupID } from "@domain/SmartFurnitureHookupID";
-
-import { SmartFurnitureHookupEndpointConfigurationError } from "@application/errors";
+import { SmartFurnitureHookup } from "@domain/entities/SmartFurnitureHookup";
+import { SmartFurnitureHookupID } from "@domain/values/SmartFurnitureHookupID";
 import { SmartFurnitureHookupService } from "@application/inbound/SmartFurnitureHookupService";
-import { SmartFurnitureHookupRepository } from "@application/outbound/SmartFurnitureHookupRepository";
+import { SmartFurnitureHookupRepository } from "@domain/ports/SmartFurnitureHookupRepository";
 import { MonitoringService } from "@application/outbound/MonitoringService";
+import { IdGenerator } from "@application/outbound/IdGenerator";
+import { UnitOfWork } from "@application/outbound/UnitOfWork";
+import { EventPublisher } from "@application/outbound/EventPublisher";
+import { BusinessMetrics } from "@application/outbound/BusinessMetrics";
+import { SmartFurnitureHookupName } from "@domain/values/SmartFurnitureHookupName";
+import { UtilityType } from "@domain/values/UtilityType";
+import { EndpointURL } from "@domain/values/EndpointURL";
 import { SmartFurnitureHookupNotFoundError } from "@domain/errors";
 
 export class SmartFurnitureHookupServiceImpl implements SmartFurnitureHookupService {
+  readonly #repository: SmartFurnitureHookupRepository;
+  readonly #monitoringService: MonitoringService;
+  readonly #idGenerator: IdGenerator;
+  readonly #uow: UnitOfWork;
+  readonly #eventPublisher: EventPublisher;
+  readonly #metrics: BusinessMetrics;
+
   constructor(
-    private readonly smartFurnitureHookupRepository: SmartFurnitureHookupRepository,
-    private readonly monitoringService: MonitoringService,
-  ) {}
+    smartFurnitureHookupRepository: SmartFurnitureHookupRepository,
+    monitoringService: MonitoringService,
+    idGenerator: IdGenerator,
+    uow: UnitOfWork,
+    eventPublisher: EventPublisher,
+    metrics: BusinessMetrics,
+  ) {
+    this.#repository = smartFurnitureHookupRepository;
+    this.#monitoringService = monitoringService;
+    this.#idGenerator = idGenerator;
+    this.#uow = uow;
+    this.#eventPublisher = eventPublisher;
+    this.#metrics = metrics;
+  }
+
+  stripErrors<T extends Record<string, unknown>>(
+    obj: T,
+  ): { [K in keyof T]: Exclude<T[K], Error> } | Error {
+    const error = Object.values(obj).find(
+      (v): v is Error => v instanceof Error,
+    );
+    return error ?? (obj as { [K in keyof T]: Exclude<T[K], Error> });
+  }
 
   async createSmartFurnitureHookup(
     name: string,
-    type: string,
+    utilityType: string,
     endpoint: string,
-  ): Promise<SmartFurnitureHookup> {
+  ): Promise<SmartFurnitureHookup | Error> {
+    const props = this.stripErrors({
+      id: SmartFurnitureHookupID.from(this.#idGenerator.generate()),
+      name: SmartFurnitureHookupName.from(name),
+      utilityType: UtilityType.from(utilityType),
+      endpoint: EndpointURL.from(endpoint),
+    });
+
+    if (props instanceof Error) return props;
+
+    const smartFurnitureHookupEntity = SmartFurnitureHookup.create(
+      props.id,
+      props.name,
+      props.utilityType,
+      props.endpoint,
+    );
+
+    await this.#uow.executeTransactionally(async () => {
+      await this.#repository.saveSmartFurnitureHookup(
+        smartFurnitureHookupEntity,
+      );
+
+      await this.#monitoringService.registerSmartFurnitureHookup(
+        smartFurnitureHookupEntity.id,
+        smartFurnitureHookupEntity.endpoint,
+      );
+
+      for (const event of smartFurnitureHookupEntity.pullDomainEvents()) {
+        await this.#eventPublisher.publish(event);
+      }
+    });
+    this.#metrics.recordSmartFurnitureHookupCreation();
+    return smartFurnitureHookupEntity;
+  }
+
+  async deleteSmartFurnitureHookup(id: string): Promise<undefined | Error> {
+    const props = this.stripErrors({
+      id: SmartFurnitureHookupID.from(id),
+    });
+
+    if (props instanceof Error) return props;
+
+    const smartFurnitureHookup = await this.#checkIfSmartFurnitureHookupExists(
+      props.id,
+    );
+
+    if (smartFurnitureHookup instanceof Error) return smartFurnitureHookup;
+
+    smartFurnitureHookup.prepareForDeletion();
+
+    await this.#uow.executeTransactionally(async () => {
+      await this.#monitoringService
+        .disconnectSmartFurnitureHookup(smartFurnitureHookup.endpoint)
+        .catch();
+
+      await this.#repository.removeSmartFurnitureHookup(props.id);
+
+      for (const event of smartFurnitureHookup.pullDomainEvents()) {
+        await this.#eventPublisher.publish(event);
+      }
+    });
+
+    this.#metrics.recordSmartFurnitureHookupDeletion();
+  }
+
+  async getSmartFurnitureHookups(): Promise<SmartFurnitureHookup[]> {
+    return this.#repository.findAllSmartFurnitureHookup();
+  }
+
+  async getSmartFurnitureHookup(
+    id: string,
+  ): Promise<SmartFurnitureHookup | Error> {
+    const props = this.stripErrors({
+      id: SmartFurnitureHookupID.from(id),
+    });
+
+    if (props instanceof Error) return props;
+
     const smartFurnitureHookup =
-      await this.smartFurnitureHookupRepository.saveSmartFurnitureHookup(
-        new SmartFurnitureHookupFactory().createSmartFurnitureHookup(
-          name,
-          utilityTypeFromString(type),
-          endpoint,
-        ),
-      );
+      await this.#repository.findSmartFurnitureHookupByID(props.id);
 
-    try {
-      await this.monitoringService.registerSmartFurnitureHookup(
-        smartFurnitureHookup.id,
-        smartFurnitureHookup.endpoint,
-      );
-    } catch {
-      await this.smartFurnitureHookupRepository.removeSmartFurnitureHookup(
-        smartFurnitureHookup.id,
-      );
-
-      throw new SmartFurnitureHookupEndpointConfigurationError(
-        smartFurnitureHookup.endpoint,
-      );
-    }
+    if (!smartFurnitureHookup) return new SmartFurnitureHookupNotFoundError();
 
     return smartFurnitureHookup;
   }
 
-  async deleteSmartFurnitureHookup(id: SmartFurnitureHookupID): Promise<void> {
-    const currentSmartFurnitureHookup =
-      await this.checkIfSmartFurnitureHookupExists(id);
-
-    await this.monitoringService
-      .disconnectSmartFurnitureHookup(currentSmartFurnitureHookup.endpoint)
-      .catch();
-
-    return this.smartFurnitureHookupRepository.removeSmartFurnitureHookup(id);
-  }
-
-  async getSmartFurnitureHookups(): Promise<SmartFurnitureHookup[]> {
-    return this.smartFurnitureHookupRepository.findAllSmartFurnitureHookup();
-  }
-
-  async getSmartFurnitureHookup(
-    id: SmartFurnitureHookupID,
-  ): Promise<SmartFurnitureHookup | null> {
-    return this.smartFurnitureHookupRepository.findSmartFurnitureHookupByID(id);
-  }
-
   async updateSmartFurnitureHookup(
-    id: SmartFurnitureHookupID,
+    id: string,
     name?: string,
     endpoint?: string,
-  ): Promise<SmartFurnitureHookup> {
-    const currentSmartFurnitureHookup =
-      await this.checkIfSmartFurnitureHookupExists(id);
+  ): Promise<SmartFurnitureHookup | Error> {
+    const props = this.stripErrors({
+      id: SmartFurnitureHookupID.from(id),
+      endpoint: endpoint ? EndpointURL.from(endpoint) : undefined,
+      name: name ? SmartFurnitureHookupName.from(name) : undefined,
+    });
 
-    if (endpoint) {
-      try {
-        await this.monitoringService.registerSmartFurnitureHookup(id, endpoint);
-      } catch {
-        throw new SmartFurnitureHookupEndpointConfigurationError(endpoint);
-      }
+    if (props instanceof Error) return props;
+
+    const smartFurnitureHookup = await this.#checkIfSmartFurnitureHookupExists(
+      props.id,
+    );
+
+    if (smartFurnitureHookup instanceof Error) {
+      return smartFurnitureHookup;
     }
 
-    const smartFurnitureHookupToUpdate: SmartFurnitureHookup = {
-      ...currentSmartFurnitureHookup,
-      name: name ?? currentSmartFurnitureHookup.name,
-      endpoint: endpoint ?? currentSmartFurnitureHookup.endpoint,
-    };
+    if (props.endpoint) smartFurnitureHookup.changeEndpoint(props.endpoint);
+    if (props.name) smartFurnitureHookup.changeName(props.name);
 
-    return this.smartFurnitureHookupRepository.updateSmartFurnitureHookup(
-      smartFurnitureHookupToUpdate,
-    );
+    await this.#uow.executeTransactionally(async () => {
+      if (endpoint) {
+        await this.#monitoringService.registerSmartFurnitureHookup(
+          smartFurnitureHookup.id,
+          smartFurnitureHookup.endpoint,
+        );
+      }
+
+      await this.#repository.updateSmartFurnitureHookup(smartFurnitureHookup);
+
+      for (const event of smartFurnitureHookup.pullDomainEvents()) {
+        await this.#eventPublisher.publish(event);
+      }
+    });
+
+    this.#metrics.recordSmartFurnitureHookupUpdate();
+
+    return smartFurnitureHookup;
   }
 
-  private async checkIfSmartFurnitureHookupExists(id: SmartFurnitureHookupID) {
+  async #checkIfSmartFurnitureHookupExists(id: SmartFurnitureHookupID) {
     const currentSmartFurnitureHookup =
-      await this.smartFurnitureHookupRepository.findSmartFurnitureHookupByID(
-        id,
-      );
+      await this.#repository.findSmartFurnitureHookupByID(id);
 
     if (!currentSmartFurnitureHookup) {
-      throw new SmartFurnitureHookupNotFoundError();
-    } else return currentSmartFurnitureHookup;
+      return new SmartFurnitureHookupNotFoundError();
+    }
+
+    return currentSmartFurnitureHookup;
   }
 }

@@ -1,5 +1,4 @@
-import { SmartFurnitureHookup } from "@domain/SmartFurnitureHookup";
-import { SmartFurnitureHookupID } from "@domain/SmartFurnitureHookupID";
+import { SmartFurnitureHookup } from "@domain/entities/SmartFurnitureHookup";
 
 /**
  * Service interface for managing smart furniture hookup.
@@ -20,26 +19,20 @@ export interface SmartFurnitureHookupService {
    *
    * @throws InvalidIDError
    */
-  getSmartFurnitureHookup(
-    id: SmartFurnitureHookupID,
-  ): Promise<SmartFurnitureHookup | null>;
+  getSmartFurnitureHookup(id: string): Promise<SmartFurnitureHookup | Error>;
 
   /**
    * Creates a new smart furniture hookup with the given name, consumption and endpoint.
    *
    * @param name - The name of the new smart furniture hookup.
-   * @param consumption - The consumption information of the new smart furniture hookup.
+   * @param utilityType - The consumption information of the new smart furniture hookup.
    * @param endpoint - The endpoint of the new smart furniture hookup.
-   *
-   * @throws SmartFurnitureHookupNameConflictError
-   * @throws SmartFurnitureHookupEndpointConflictError
-   * @throws InvalidConsumptionTypeError
    */
   createSmartFurnitureHookup(
     name: string,
-    consumption: string,
+    utilityType: string,
     endpoint: string,
-  ): Promise<SmartFurnitureHookup>;
+  ): Promise<SmartFurnitureHookup | Error>;
 
   /**
    * Updates the name and/or the endpoint of a smart furniture hookup.
@@ -54,10 +47,10 @@ export interface SmartFurnitureHookupService {
    * @throws SmartFurnitureHookupEndpointConflictError
    */
   updateSmartFurnitureHookup(
-    id: SmartFurnitureHookupID,
+    id: string,
     name?: string,
     endpoint?: string,
-  ): Promise<SmartFurnitureHookup>;
+  ): Promise<SmartFurnitureHookup | Error>;
 
   /**
    *  Deletes an existing smart furniture hookup by their unique identifier.
@@ -67,5 +60,5 @@ export interface SmartFurnitureHookupService {
    * @throws InvalidIDError
    * @throws SmartFurnitureHookupNotFoundError
    */
-  deleteSmartFurnitureHookup(id: SmartFurnitureHookupID): Promise<void>;
+  deleteSmartFurnitureHookup(id: string): Promise<undefined | Error>;
 }

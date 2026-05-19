@@ -1,4 +1,5 @@
-import { SmartFurnitureHookupID } from "@domain/SmartFurnitureHookupID";
+import { SmartFurnitureHookupID } from "@domain/values/SmartFurnitureHookupID";
+import { EndpointURL } from "@domain/values/EndpointURL";
 
 /**
  * @outbound
@@ -15,7 +16,7 @@ export interface MonitoringService {
    */
   registerSmartFurnitureHookup(
     id: SmartFurnitureHookupID,
-    endpoint: string,
+    endpoint: EndpointURL,
   ): Promise<void>;
 
   /**
@@ -25,5 +26,5 @@ export interface MonitoringService {
    * @param endpoint - The endpoint URL or address to disconnect
    * @returns A promise that resolves when the hookup is successfully disconnected
    */
-  disconnectSmartFurnitureHookup(endpoint: string): Promise<void>;
+  disconnectSmartFurnitureHookup(endpoint: EndpointURL): Promise<void>;
 }
