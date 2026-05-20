@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const smartFurnitureHookupId = z.string().nonempty();
+const smartFurnitureHookupId = z.uuid();
 const name = z.string().nonempty();
 const utilityType = z.string().nonempty();
 const endpoint = z.string().nonempty();

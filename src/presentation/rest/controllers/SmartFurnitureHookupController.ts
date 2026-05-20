@@ -1,4 +1,4 @@
-import { type Request, type Response } from "express";
+import type { Request, Response } from "express";
 import { smartFurnitureHookupDTOMapper } from "@presentation/SmartFurnitureHookupDTO";
 import { StatusCodes } from "http-status-codes";
 import { SmartFurnitureHookupService } from "@application/inbound/SmartFurnitureHookupService";
@@ -24,7 +24,7 @@ export class SmartFurnitureHookupController {
   async getSmartFurnitureHookup(req: Request, res: Response) {
     const smartFurnitureHookup =
       await this.#smartFurnitureHookupService.getSmartFurnitureHookup(
-        req.params.id,
+        req.params.id as string,
       );
 
     if (smartFurnitureHookup instanceof Error) {
@@ -54,13 +54,11 @@ export class SmartFurnitureHookupController {
   }
 
   async updateSmartFurnitureHookup(req: Request, res: Response) {
-    const id = req.params.id;
-
     const { name, endpoint } = req.body;
 
     const smartFurnitureHookup =
       await this.#smartFurnitureHookupService.updateSmartFurnitureHookup(
-        id,
+        req.params.id as string,
         name,
         endpoint,
       );
@@ -75,7 +73,7 @@ export class SmartFurnitureHookupController {
   async deleteSmartFurnitureHookup(req: Request, res: Response) {
     const result =
       await this.#smartFurnitureHookupService.deleteSmartFurnitureHookup(
-        req.params.id,
+        req.params.id as string,
       );
 
     if (result instanceof Error) throw result;
