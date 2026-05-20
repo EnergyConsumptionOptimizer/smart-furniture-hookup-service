@@ -13,17 +13,7 @@ export function setupGracefulShutdown(
   const shutdown = async () => {
     logger.info("graceful shutdown initiated");
     server.close();
-    deps.monitoringWebSocketAdapter.disconnect();
-    try {
-      await deps.forecastConsumer.disconnect();
-    } catch {
-      /* ignore */
-    }
-    try {
-      await deps.forecastsDlqPublisher.disconnect();
-    } catch {
-      /* ignore */
-    }
+
     await mongoose.disconnect();
     try {
       await sdk.shutdown();

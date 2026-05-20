@@ -13,7 +13,7 @@ const sdk = startInstrumentation(rootLogger);
 async function start(): Promise<void> {
   await connectMongo(config.mongo.uri, logger);
 
-  const composed = composeApp(rootLogger);
+  const composed = await composeApp(rootLogger);
 
   const server = composed.app.listen(config.port, () => {
     logger.info({ port: config.port }, "listening");
