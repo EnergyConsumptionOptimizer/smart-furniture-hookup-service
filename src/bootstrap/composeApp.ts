@@ -23,7 +23,7 @@ export interface ComposedApp {
   readonly app: Express;
 }
 
-function createInfrastructureLayer(logger: Logger) {
+export function createInfrastructureLayer(logger: Logger) {
   return {
     repository: new MongooseSmartFurnitureHookupRepository(),
     monitoringService: new HTTPMonitoringService(),
@@ -36,7 +36,7 @@ function createInfrastructureLayer(logger: Logger) {
   };
 }
 
-function createApplicationLayer(
+export function createApplicationLayer(
   repository: SmartFurnitureHookupRepository,
   monitoringService: MonitoringService,
   idGenerator: IdGenerator,
@@ -56,7 +56,7 @@ function createApplicationLayer(
   };
 }
 
-function createPresentationLayer(
+export function createPresentationLayer(
   smartFurnitureHookupService: SmartFurnitureHookupService,
 ) {
   const authMiddleware = new AuthMiddleware();
@@ -68,7 +68,7 @@ function createPresentationLayer(
   };
 }
 
-export function composeApp(logger: Logger) {
+export async function composeApp(logger: Logger) {
   const infra = createInfrastructureLayer(logger);
 
   const application = createApplicationLayer(
