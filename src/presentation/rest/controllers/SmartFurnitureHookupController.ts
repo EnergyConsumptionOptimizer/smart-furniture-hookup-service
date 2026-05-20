@@ -80,6 +80,6 @@ export class SmartFurnitureHookupController {
 
     if (result instanceof Error) throw result;
 
-    res.status(StatusCodes.NO_CONTENT);
+    res.sendStatus(StatusCodes.NO_CONTENT);
   }
 }
