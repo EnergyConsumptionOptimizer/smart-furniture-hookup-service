@@ -33,11 +33,17 @@ export function smartFurnitureHookupRoutes(
     .get(validate(SmartFurnitureHookupIdParamSchema), (req, res) =>
       smartFurnitureHookupController.getSmartFurnitureHookup(req, res),
     )
-    .patch(validate(UpdateSmartFurnitureHookupSchema), (req, res) =>
-      smartFurnitureHookupController.updateSmartFurnitureHookup(req, res),
+    .patch(
+      validate(UpdateSmartFurnitureHookupSchema),
+      authMiddleware.requireRole(UserRoles.ADMIN),
+      (req, res) =>
+        smartFurnitureHookupController.updateSmartFurnitureHookup(req, res),
     )
-    .delete(validate(SmartFurnitureHookupIdParamSchema), (req, res) =>
-      smartFurnitureHookupController.deleteSmartFurnitureHookup(req, res),
+    .delete(
+      validate(SmartFurnitureHookupIdParamSchema),
+      authMiddleware.requireRole(UserRoles.ADMIN),
+      (req, res) =>
+        smartFurnitureHookupController.deleteSmartFurnitureHookup(req, res),
     );
 
   return router;
