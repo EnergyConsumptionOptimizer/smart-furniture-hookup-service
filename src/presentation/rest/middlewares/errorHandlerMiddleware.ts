@@ -1,5 +1,5 @@
 import { AuthRequiredError, ForbiddenError } from "@presentation/errors";
-import { DomainError, DomainErrorCode } from "@domain/errors"; // Adjust this import path as needed
+import { DomainError, DomainErrorCode } from "@domain/errors";
 import type { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import type { Logger } from "pino";
