@@ -197,7 +197,7 @@ describe("Smart Furniture Hookup REST API", () => {
       expect(
         smartFurnitureHookupService.deleteSmartFurnitureHookup,
       ).toHaveBeenCalledWith(id);
-      expect(res.status).toHaveBeenCalledWith(StatusCodes.NO_CONTENT);
+      expect(res.sendStatus).toHaveBeenCalledWith(StatusCodes.NO_CONTENT);
     });
 
     it("should throw SmartFurnitureHookupNotFoundError when deleting a non-existing hookup", async () => {
