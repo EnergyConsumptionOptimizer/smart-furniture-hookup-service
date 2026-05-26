@@ -5,8 +5,6 @@ import { EndpointURL } from "@domain/values/EndpointURL";
 import { SmartFurnitureHookupName } from "@domain/values/SmartFurnitureHookupName";
 import { SmartFurnitureHookupCreatedEvent } from "@domain/events/SmartFurnitureHookupCreatedEvent";
 import { SmartFurnitureHookupDeletedEvent } from "@domain/events/SmartFurnitureHookupDeletedEvent";
-import { SmartFurnitureHookupEndpointChangedEvent } from "@domain/events/SmartFurnitureHookupEndpointChangedEvent";
-import { SmartFurnitureHookupRenamedEvent } from "@domain/events/SmartFurnitureHookupRenamedEvent";
 
 export class SmartFurnitureHookup extends AggregateRoot {
   #name: SmartFurnitureHookupName;
@@ -66,17 +64,11 @@ export class SmartFurnitureHookup extends AggregateRoot {
   }
 
   changeEndpoint(newEndpoint: EndpointURL): void {
-    const oldEndpoint = this.#endpoint;
     this.#endpoint = newEndpoint;
-    this.addDomainEvent(
-      new SmartFurnitureHookupEndpointChangedEvent(this, oldEndpoint),
-    );
   }
 
   changeName(newName: SmartFurnitureHookupName): void {
-    const oldName = this.#name;
     this.#name = newName;
-    this.addDomainEvent(new SmartFurnitureHookupRenamedEvent(this, oldName));
   }
 
   prepareForDeletion(): void {
