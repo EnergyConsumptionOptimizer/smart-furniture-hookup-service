@@ -1,32 +1,36 @@
 import { MonitoringService } from "@application/outbound/MonitoringService";
-import { SmartFurnitureHookupID } from "@domain/values/SmartFurnitureHookupID";
 import axios from "axios";
-import { EndpointURL } from "@domain/values/EndpointURL";
+import { Logger } from "pino";
+import { getIngestingEndpointResponse } from "@infrastructure/contracts/getIngestingEndpointResponse";
 
 export class HTTPMonitoringService implements MonitoringService {
-  private readonly MONITORING_SERVICE_URI =
-    process.env.MONITORING_SERVICE_URI ||
-    `http://${process.env.MONITORING_SERVICE_HOST || "monitoring"}:${process.env.MONITORING_SERVICE_PORT || 3003}`;
+  readonly #logger?: Logger;
 
-  async registerSmartFurnitureHookup(
-    id: SmartFurnitureHookupID,
-    endpoint: EndpointURL,
-  ): Promise<void> {
-    await axios.post(
-      `${this.MONITORING_SERVICE_URI}/api/internal/registerSmartFurnitureHookup`,
-      {
-        smartFurnitureHookupID: id.value,
-        endpoint,
-      },
-    );
+  constructor(
+    private readonly baseUrl: string,
+    logger?: Logger,
+  ) {
+    this.#logger = logger;
   }
 
-  async disconnectSmartFurnitureHookup(endpoint: EndpointURL): Promise<void> {
-    await axios.post(
-      `${this.MONITORING_SERVICE_URI}/api/internal/disconnectSmartFurnitureHookup`,
-      {
-        endpoint,
-      },
-    );
+  async getIngestingEndpoint(): Promise<string | Error> {
+    const url = `${this.baseUrl}/api/internal/measurement/getIngestingEndpoint`;
+
+    try {
+      const response = getIngestingEndpointResponse.safeParse(
+        await axios.get(url),
+      );
+
+      if (!response.success) {
+        return new Error("Empty ingesting endpoint");
+      }
+      return response.data.endpoint;
+    } catch (error) {
+      this.#logger?.error({ error }, "Could not get ingesting endpoint");
+      if (error instanceof Error) {
+        return error.message;
+      }
+      return new Error("Could not get ingesting endpoint");
+    }
   }
 }
