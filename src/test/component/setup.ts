@@ -5,8 +5,8 @@ import {
   createApplicationLayer,
   createInfrastructureLayer,
   createPresentationLayer,
-} from "../../bootstrap/composeApp";
-import { createApp } from "../../bootstrap/app";
+} from "@bootstrap/composeApp";
+import { createApp } from "@bootstrap/app";
 import { MonitoringService } from "@application/outbound/MonitoringService";
 
 vi.mock("@bootstrap/config", () => ({

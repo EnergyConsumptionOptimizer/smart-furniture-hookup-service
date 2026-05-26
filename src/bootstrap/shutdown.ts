@@ -1,12 +1,10 @@
 import type { Server } from "node:http";
-import type { ComposedApp } from "@bootstrap/composeApp";
 import type { NodeSDK } from "@opentelemetry/sdk-node";
 import mongoose from "mongoose";
 import type { Logger } from "pino";
 
 export function setupGracefulShutdown(
   server: Server,
-  deps: ComposedApp,
   sdk: NodeSDK,
   logger: Logger,
 ): void {

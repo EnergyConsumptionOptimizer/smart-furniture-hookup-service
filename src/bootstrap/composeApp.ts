@@ -68,7 +68,7 @@ export function createPresentationLayer(
   };
 }
 
-export async function composeApp(logger: Logger) {
+export async function composeApp(logger: Logger): Promise<ComposedApp> {
   const infra = createInfrastructureLayer(logger);
 
   const application = createApplicationLayer(

@@ -1,10 +1,10 @@
 import "dotenv/config";
 import { createLogger } from "./logger";
-import { config } from "./bootstrap/config";
+import { config } from "@bootstrap/config";
 import { startInstrumentation } from "./instrumentation";
-import { connectMongo } from "./bootstrap/mongoConnection";
-import { composeApp } from "./bootstrap/composeApp";
-import { setupGracefulShutdown } from "./bootstrap/shutdown";
+import { connectMongo } from "@bootstrap/mongoConnection";
+import { composeApp } from "@bootstrap/composeApp";
+import { setupGracefulShutdown } from "@bootstrap/shutdown";
 
 const rootLogger = createLogger(config);
 const logger = rootLogger.child({ component: "Server" });
@@ -19,7 +19,7 @@ async function start(): Promise<void> {
     logger.info({ port: config.port }, "listening");
   });
 
-  setupGracefulShutdown(server, composed, sdk, logger);
+  setupGracefulShutdown(server, sdk, logger);
 }
 
 void start();
