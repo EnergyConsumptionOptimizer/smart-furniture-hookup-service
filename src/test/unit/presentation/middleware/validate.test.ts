@@ -2,8 +2,8 @@ import { validate } from "@presentation/rest/middlewares/validate";
 import type { NextFunction } from "express";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { mockRequest } from "@test/unit/presentation/controllers/mockRequest";
-import { mockResponse } from "@test/unit/presentation/controllers/mockResponse";
+import { mockRequest } from "@test/unit/presentation/mockRequest";
+import { mockResponse } from "@test/unit/presentation/mockResponse";
 import { mockSmartFurnitureHookupBathroomSink } from "@test/unit/presentation/controllers/mockData";
 
 describe("validate() middleware", () => {

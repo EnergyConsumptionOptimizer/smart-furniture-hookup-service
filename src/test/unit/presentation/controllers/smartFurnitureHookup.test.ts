@@ -6,8 +6,8 @@ import {
   mockSmartFurnitureHookupBathroomSink,
   mockSmartFurnitureHookupKitchenSink,
 } from "@test/unit/presentation/controllers/mockData";
-import { mockRequest } from "@test/unit/presentation/controllers/mockRequest";
-import { mockResponse } from "@test/unit/presentation/controllers/mockResponse";
+import { mockRequest } from "@test/unit/presentation/mockRequest";
+import { mockResponse } from "@test/unit/presentation/mockResponse";
 import { StatusCodes } from "http-status-codes";
 import { smartFurnitureHookupDTOMapper } from "@presentation/SmartFurnitureHookupDTO";
 import { SmartFurnitureHookupNotFoundError } from "@domain/errors";

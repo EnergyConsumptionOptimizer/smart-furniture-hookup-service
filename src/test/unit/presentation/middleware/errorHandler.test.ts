@@ -15,8 +15,8 @@ import { StatusCodes } from "http-status-codes";
 import type { Logger } from "pino";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ZodError } from "zod";
-import { mockRequest } from "@test/unit/presentation/controllers/mockRequest";
-import { mockResponse } from "@test/unit/presentation/controllers/mockResponse";
+import { mockRequest } from "@test/unit/presentation/mockRequest";
+import { mockResponse } from "@test/unit/presentation/mockResponse";
 import { createErrorHandler } from "@presentation/rest/middlewares/errorHandlerMiddleware";
 
 function mockLogger(): Logger {
