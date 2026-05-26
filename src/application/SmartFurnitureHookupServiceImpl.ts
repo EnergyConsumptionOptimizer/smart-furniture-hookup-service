@@ -10,7 +10,7 @@ import { BusinessMetrics } from "@application/outbound/BusinessMetrics";
 import { SmartFurnitureHookupName } from "@domain/values/SmartFurnitureHookupName";
 import { UtilityType } from "@domain/values/UtilityType";
 import { EndpointURL } from "@domain/values/EndpointURL";
-import { SmartFurnitureHookupNotFoundError } from "@domain/errors";
+import { SmartFurnitureHookupNotFoundError, stripErrors } from "@domain/errors";
 
 export class SmartFurnitureHookupServiceImpl implements SmartFurnitureHookupService {
   readonly #repository: SmartFurnitureHookupRepository;
@@ -36,21 +36,12 @@ export class SmartFurnitureHookupServiceImpl implements SmartFurnitureHookupServ
     this.#metrics = metrics;
   }
 
-  stripErrors<T extends Record<string, unknown>>(
-    obj: T,
-  ): { [K in keyof T]: Exclude<T[K], Error> } | Error {
-    const error = Object.values(obj).find(
-      (v): v is Error => v instanceof Error,
-    );
-    return error ?? (obj as { [K in keyof T]: Exclude<T[K], Error> });
-  }
-
   async createSmartFurnitureHookup(
     name: string,
     utilityType: string,
     endpoint: string,
   ): Promise<SmartFurnitureHookup | Error> {
-    const props = this.stripErrors({
+    const props = stripErrors({
       id: SmartFurnitureHookupID.from(this.#idGenerator.generate()),
       name: SmartFurnitureHookupName.from(name),
       utilityType: UtilityType.from(utilityType),
@@ -85,7 +76,7 @@ export class SmartFurnitureHookupServiceImpl implements SmartFurnitureHookupServ
   }
 
   async deleteSmartFurnitureHookup(id: string): Promise<undefined | Error> {
-    const props = this.stripErrors({
+    const props = stripErrors({
       id: SmartFurnitureHookupID.from(id),
     });
 
@@ -121,7 +112,7 @@ export class SmartFurnitureHookupServiceImpl implements SmartFurnitureHookupServ
   async getSmartFurnitureHookup(
     id: string,
   ): Promise<SmartFurnitureHookup | Error> {
-    const props = this.stripErrors({
+    const props = stripErrors({
       id: SmartFurnitureHookupID.from(id),
     });
 
@@ -140,7 +131,7 @@ export class SmartFurnitureHookupServiceImpl implements SmartFurnitureHookupServ
     name?: string,
     endpoint?: string,
   ): Promise<SmartFurnitureHookup | Error> {
-    const props = this.stripErrors({
+    const props = stripErrors({
       id: SmartFurnitureHookupID.from(id),
       endpoint: endpoint ? EndpointURL.from(endpoint) : undefined,
       name: name ? SmartFurnitureHookupName.from(name) : undefined,

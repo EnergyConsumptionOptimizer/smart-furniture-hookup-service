@@ -17,6 +17,13 @@ export abstract class DomainError extends Error {
   }
 }
 
+export function stripErrors<T extends Record<string, unknown>>(
+  obj: T,
+): { [K in keyof T]: Exclude<T[K], Error> } | Error {
+  const error = Object.values(obj).find((v): v is Error => v instanceof Error);
+  return error ?? (obj as { [K in keyof T]: Exclude<T[K], Error> });
+}
+
 // ==========================================
 // Empty Field Errors
 // ==========================================
@@ -82,6 +89,7 @@ export class UrlAlreadyExistsError extends UniqueFieldAlreadyExistsError {
 
 export class NotFoundError extends DomainError {
   public readonly code = DomainErrorCode.NOT_FOUND;
+
   constructor(entityName = "Resource") {
     super(`${entityName} not found`);
   }
@@ -99,6 +107,7 @@ export class SmartFurnitureHookupNotFoundError extends NotFoundError {
 
 export class InvalidUtilityTypeError extends DomainError {
   public readonly code = DomainErrorCode.INVALID_UTILITY_TYPE;
+
   constructor(type: string) {
     super(`Invalid utility type: ${type}`);
   }
