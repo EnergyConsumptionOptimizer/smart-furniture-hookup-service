@@ -6,7 +6,7 @@ import {
   CreateSmartFurnitureHookupSchema,
   SmartFurnitureHookupIdParamSchema,
   UpdateSmartFurnitureHookupSchema,
-} from "@presentation/SmartFurnitureHookupSchema";
+} from "@presentation/rest/schemas/SmartFurnitureHookupSchema";
 import { UserRoles } from "@domain/values/UserRole";
 
 export function smartFurnitureHookupRoutes(

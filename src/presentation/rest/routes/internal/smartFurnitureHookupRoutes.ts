@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { SmartFurnitureHookupController } from "@presentation/rest/controllers/SmartFurnitureHookupController";
 import { validate } from "@presentation/rest/middlewares/validate";
-import { SmartFurnitureHookupIdParamSchema } from "@presentation/SmartFurnitureHookupSchema";
+import { SmartFurnitureHookupIdParamSchema } from "@presentation/rest/schemas/SmartFurnitureHookupSchema";
 
 export function smartFurnitureHookupRoutes(
   smartFurnitureHookupController: SmartFurnitureHookupController,
