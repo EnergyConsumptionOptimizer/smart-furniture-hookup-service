@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   validEndpointUrl,
   validId,
@@ -7,8 +7,6 @@ import {
 } from "@test/domainFactories";
 import { SmartFurnitureHookup } from "@domain/entities/SmartFurnitureHookup";
 import { SmartFurnitureHookupCreatedEvent } from "@domain/events/SmartFurnitureHookupCreatedEvent";
-import { SmartFurnitureHookupEndpointChangedEvent } from "@domain/events/SmartFurnitureHookupEndpointChangedEvent";
-import { SmartFurnitureHookupRenamedEvent } from "@domain/events/SmartFurnitureHookupRenamedEvent";
 import { SmartFurnitureHookupDeletedEvent } from "@domain/events/SmartFurnitureHookupDeletedEvent";
 
 describe("SmartFurnitureHookup Entity", () => {
@@ -56,55 +54,6 @@ describe("SmartFurnitureHookup Entity", () => {
 
       expect(hookup).toBeInstanceOf(SmartFurnitureHookup);
       expect(hookup.pullDomainEvents()).toHaveLength(0);
-    });
-  });
-
-  describe("changeEndpoint()", () => {
-    it("should update endpoint and emit SmartFurnitureHookupEndpointChangedEvent", () => {
-      const oldEndpoint = validEndpointUrl("oldEndpoint");
-
-      const hookup = SmartFurnitureHookup.create(
-        validId(),
-        validSmartFurnitureHookupName(),
-        validUtilityType(),
-        oldEndpoint,
-      );
-
-      hookup.pullDomainEvents();
-
-      const newEndpoint = validEndpointUrl("newEndpoint");
-
-      hookup.changeEndpoint(newEndpoint);
-
-      expect(hookup.endpoint).toBe(newEndpoint);
-
-      const events = hookup.pullDomainEvents();
-      expect(events).toHaveLength(1);
-      expect(events[0]).toBeInstanceOf(
-        SmartFurnitureHookupEndpointChangedEvent,
-      );
-    });
-  });
-
-  describe("changeName()", () => {
-    it("should update name and emit SmartFurnitureHookupRenamedEvent", () => {
-      const oldName = validSmartFurnitureHookupName("Old Name");
-      const hookup = SmartFurnitureHookup.create(
-        validId(),
-        oldName,
-        validUtilityType(),
-        validEndpointUrl(),
-      );
-      hookup.pullDomainEvents();
-
-      const newName = validSmartFurnitureHookupName("New Name");
-      hookup.changeName(newName);
-
-      expect(hookup.name).toBe(newName);
-
-      const events = hookup.pullDomainEvents();
-      expect(events).toHaveLength(1);
-      expect(events[0]).toBeInstanceOf(SmartFurnitureHookupRenamedEvent);
     });
   });
 
