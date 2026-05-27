@@ -18,6 +18,9 @@ import { AuthMiddleware } from "@presentation/rest/middlewares/AuthMiddleware";
 import { router } from "@presentation/rest/routes/router";
 import { createApp } from "./app";
 import { SmartFurnitureHookupService } from "@application/inbound/SmartFurnitureHookupService";
+import { PhysicalSmartFurnitureHookupCommunication } from "@application/outbound/PhysicalSmartFurnitureHookupCommunication";
+import { config } from "@bootstrap/config";
+import { HTTPPhysicalSmartFurnitureHookupCommunication } from "@infrastructure/HTTPPhysicalSmartFurnitureHookupCommunication";
 
 export interface ComposedApp {
   readonly app: Express;
@@ -26,7 +29,12 @@ export interface ComposedApp {
 export function createInfrastructureLayer(logger: Logger) {
   return {
     repository: new MongooseSmartFurnitureHookupRepository(),
-    monitoringService: new HTTPMonitoringService(),
+    monitoringService: new HTTPMonitoringService(
+      config.monitoringServiceUrl,
+      logger,
+    ),
+    physicalSmartFurnitureHookupCommunication:
+      new HTTPPhysicalSmartFurnitureHookupCommunication(logger),
     idGenerator: new NodeCryptoIdGenerator(),
     eventPublisher: new MongoOutboxEventPublisher(
       logger.child({ component: "MongoOutboxEventPublisher" }),
@@ -39,6 +47,7 @@ export function createInfrastructureLayer(logger: Logger) {
 export function createApplicationLayer(
   repository: SmartFurnitureHookupRepository,
   monitoringService: MonitoringService,
+  physicalSmartFurnitureHookupCommunication: PhysicalSmartFurnitureHookupCommunication,
   idGenerator: IdGenerator,
   uow: UnitOfWork,
   eventPublisher: EventPublisher,
@@ -48,6 +57,7 @@ export function createApplicationLayer(
     smartFurnitureHookupService: new SmartFurnitureHookupServiceImpl(
       repository,
       monitoringService,
+      physicalSmartFurnitureHookupCommunication,
       idGenerator,
       uow,
       eventPublisher,
@@ -74,6 +84,7 @@ export async function composeApp(logger: Logger): Promise<ComposedApp> {
   const application = createApplicationLayer(
     infra.repository,
     infra.monitoringService,
+    infra.physicalSmartFurnitureHookupCommunication,
     infra.idGenerator,
     infra.uow,
     infra.eventPublisher,
