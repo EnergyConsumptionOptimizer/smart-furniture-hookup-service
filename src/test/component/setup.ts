@@ -8,6 +8,7 @@ import {
 } from "@bootstrap/composeApp";
 import { createApp } from "@bootstrap/app";
 import { MonitoringService } from "@application/outbound/MonitoringService";
+import { PhysicalSmartFurnitureHookupCommunication } from "@application/outbound/PhysicalSmartFurnitureHookupCommunication";
 
 vi.mock("@bootstrap/config", () => ({
   config: {
@@ -32,13 +33,17 @@ export async function composeAppForComponentTest(): Promise<ComponentTestContext
   const infra = createInfrastructureLayer(logger);
 
   const mockMonitoringService: MonitoringService = {
-    registerSmartFurnitureHookup: vi.fn().mockResolvedValue(undefined),
-    disconnectSmartFurnitureHookup: vi.fn().mockResolvedValue(undefined),
+    getIngestingEndpoint: vi.fn().mockResolvedValue(undefined),
   };
+  const mockPhysicalSmartFurnitureHookupCommunication: PhysicalSmartFurnitureHookupCommunication =
+    {
+      updateIngestingEndpoint: vi.fn().mockResolvedValue(undefined),
+    };
 
   const application = createApplicationLayer(
     infra.repository,
     mockMonitoringService,
+    mockPhysicalSmartFurnitureHookupCommunication,
     infra.idGenerator,
     infra.uow,
     infra.eventPublisher,
