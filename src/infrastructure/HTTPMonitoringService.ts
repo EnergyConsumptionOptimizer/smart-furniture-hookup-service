@@ -14,7 +14,7 @@ export class HTTPMonitoringService implements MonitoringService {
   }
 
   async getIngestingEndpoint(): Promise<string | Error> {
-    const url = `${this.baseUrl}/api/internal/measurement/getIngestingEndpoint`;
+    const url = `${this.baseUrl}/api/internal/measurements/getIngestingEndpoint`;
 
     try {
       const response = getIngestingEndpointResponse.safeParse(
