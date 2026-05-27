@@ -11,11 +11,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { MongoUnitOfWork } from "@infrastructure/mongo/MongoUnitOfWork";
 import { MongooseSmartFurnitureHookupRepository } from "@infrastructure/mongo/MongooseSmartFurnitureHookupRepository";
 import { SmartFurnitureHookupModel } from "@infrastructure/mongo/mongoose/SmartFurnitureHookupModel";
-import {
-  aNewSmartFurnitureHookup,
-  validEndpointUrl,
-  validSmartFurnitureHookupName,
-} from "@test/domainFactories";
+import { aNewSmartFurnitureHookup } from "@test/domainFactories";
 import { SmartFurnitureHookupCreatedEvent } from "@domain/events/SmartFurnitureHookupCreatedEvent";
 import { NameAlreadyExistsError } from "@domain/errors";
 import { seedSmartFurnitureHookup } from "@test/integration/seedSmartFurnitureHookup";
@@ -118,32 +114,6 @@ describe("Outbox Pattern (integration) - SmartFurnitureHookup", () => {
     expect(outboxDocs).toHaveLength(0);
   });
 
-  it("publishes a SmartFurnitureHookupRenamedEvent via the outbox", async () => {
-    const hookup = aNewSmartFurnitureHookup({
-      name: "Old Name",
-    });
-    await saveWithOutbox(hookup);
-
-    const saved = await repository.findSmartFurnitureHookupByID(hookup.id);
-    if (!saved) return;
-
-    saved.changeName(validSmartFurnitureHookupName("New Name"));
-
-    await uow.executeTransactionally(async () => {
-      await repository.updateSmartFurnitureHookup(saved);
-      for (const event of saved.pullDomainEvents()) {
-        await eventPublisher.publish(event);
-      }
-    });
-
-    const outboxDocs = await findAllOutboxEvents();
-    expect(outboxDocs).toHaveLength(2);
-    expect(outboxDocs[0].eventType).toBe("SmartFurnitureHookupCreatedEvent");
-    expect(outboxDocs[1]).toMatchObject({
-      eventType: "SmartFurnitureHookupRenamedEvent",
-    });
-  });
-
   it("publishes a SmartFurnitureHookupDeletedEvent via the outbox", async () => {
     const hookup = aNewSmartFurnitureHookup();
     await saveWithOutbox(hookup);
@@ -185,23 +155,18 @@ describe("Outbox Pattern (integration) - SmartFurnitureHookup", () => {
     const saved = await repository.findSmartFurnitureHookupByID(hookup.id);
     if (!saved) return;
 
-    saved.changeName(validSmartFurnitureHookupName("Renamed Hookup"));
-    saved.changeEndpoint(validEndpointUrl("http://renamed.local/api"));
     saved.prepareForDeletion();
 
     await uow.executeTransactionally(async () => {
-      await repository.removeSmartFurnitureHookup(saved.id);
       for (const event of saved.pullDomainEvents()) {
         await eventPublisher.publish(event);
       }
     });
 
     const outboxDocs = await findAllOutboxEvents();
-    expect(outboxDocs).toHaveLength(4);
+    expect(outboxDocs).toHaveLength(2);
     expect(outboxDocs.map((d) => d.eventType)).toEqual([
       "SmartFurnitureHookupCreatedEvent",
-      "SmartFurnitureHookupRenamedEvent",
-      "SmartFurnitureHookupEndpointChangedEvent",
       "SmartFurnitureHookupDeletedEvent",
     ]);
   });

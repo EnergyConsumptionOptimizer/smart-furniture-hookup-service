@@ -9,7 +9,7 @@ import { SmartFurnitureHookupNotFoundError } from "@domain/errors";
 import { SmartFurnitureHookupCreatedEvent } from "@domain/events/SmartFurnitureHookupCreatedEvent";
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { type MockProxy, mock } from "vitest-mock-extended";
+import { mock, type MockProxy } from "vitest-mock-extended";
 import { SmartFurnitureHookupServiceImpl } from "@application/SmartFurnitureHookupServiceImpl";
 import {
   aSmartFurnitureHookup,
@@ -18,12 +18,12 @@ import {
   validUtilityType,
 } from "@test/domainFactories";
 import { SmartFurnitureHookupDeletedEvent } from "@domain/events/SmartFurnitureHookupDeletedEvent";
-import { SmartFurnitureHookupRenamedEvent } from "@domain/events/SmartFurnitureHookupRenamedEvent";
-import { SmartFurnitureHookupEndpointChangedEvent } from "@domain/events/SmartFurnitureHookupEndpointChangedEvent";
+import { PhysicalSmartFurnitureHookupCommunication } from "@application/outbound/PhysicalSmartFurnitureHookupCommunication";
 
 describe("SmartFurnitureHookupServiceImpl", () => {
   let repository: MockProxy<SmartFurnitureHookupRepository>;
   let monitoringService: MockProxy<MonitoringService>;
+  let physicalSmartFurnitureHookupCommunication: MockProxy<PhysicalSmartFurnitureHookupCommunication>;
   let idGenerator: MockProxy<IdGenerator>;
   let uow: MockProxy<UnitOfWork>;
   let eventPublisher: MockProxy<EventPublisher>;
@@ -35,6 +35,8 @@ describe("SmartFurnitureHookupServiceImpl", () => {
   beforeEach(() => {
     repository = mock<SmartFurnitureHookupRepository>();
     monitoringService = mock<MonitoringService>();
+    physicalSmartFurnitureHookupCommunication =
+      mock<PhysicalSmartFurnitureHookupCommunication>();
     idGenerator = mock<IdGenerator>();
     uow = mock<UnitOfWork>();
     eventPublisher = mock<EventPublisher>();
@@ -49,6 +51,7 @@ describe("SmartFurnitureHookupServiceImpl", () => {
     service = new SmartFurnitureHookupServiceImpl(
       repository,
       monitoringService,
+      physicalSmartFurnitureHookupCommunication,
       idGenerator,
       uow,
       eventPublisher,
@@ -63,6 +66,7 @@ describe("SmartFurnitureHookupServiceImpl", () => {
         utilityType: validUtilityType().toString(),
         endpoint: validEndpointUrl().toString(),
       };
+
       const result = await service.createSmartFurnitureHookup(
         params.name,
         params.utilityType,
@@ -80,9 +84,11 @@ describe("SmartFurnitureHookupServiceImpl", () => {
 
       expect(uow.executeTransactionally).toHaveBeenCalled();
       expect(repository.saveSmartFurnitureHookup).toHaveBeenCalledWith(hookup);
+      expect(monitoringService.getIngestingEndpoint).toHaveBeenCalled();
+
       expect(
-        monitoringService.registerSmartFurnitureHookup,
-      ).toHaveBeenCalledWith(hookup.id, hookup.endpoint);
+        physicalSmartFurnitureHookupCommunication.updateIngestingEndpoint,
+      ).toHaveBeenCalled();
 
       expect(eventPublisher.publish).toHaveBeenCalledTimes(1);
       expect(eventPublisher.publish).toHaveBeenCalledWith(
@@ -158,7 +164,7 @@ describe("SmartFurnitureHookupServiceImpl", () => {
       });
     });
     describe("updateSmartFurnitureHookup()", () => {
-      it("should update properties, re-connect it to monitoring, save, and publish events", async () => {
+      it("should update properties, re-connect it to the physical hookup if endpoint was updated, and save", async () => {
         const existingHookup = aSmartFurnitureHookup({
           id: "update-id",
           name: "Old Name",
@@ -168,9 +174,6 @@ describe("SmartFurnitureHookupServiceImpl", () => {
 
         repository.findSmartFurnitureHookupByID.mockResolvedValue(
           existingHookup,
-        );
-        monitoringService.registerSmartFurnitureHookup.mockResolvedValue(
-          undefined,
         );
 
         const result = await service.updateSmartFurnitureHookup(
@@ -185,23 +188,13 @@ describe("SmartFurnitureHookupServiceImpl", () => {
         expect(hookup.name.value).toBe("New Name");
         expect(hookup.endpoint.value).toBe("http://new.local");
 
-        expect(uow.executeTransactionally).toHaveBeenCalled();
         expect(
-          monitoringService.registerSmartFurnitureHookup,
-        ).toHaveBeenCalledWith(hookup.id, hookup.endpoint);
+          physicalSmartFurnitureHookupCommunication.updateIngestingEndpoint,
+        ).toHaveBeenCalled();
+
         expect(repository.updateSmartFurnitureHookup).toHaveBeenCalledWith(
           hookup,
         );
-
-        expect(eventPublisher.publish).toHaveBeenCalledTimes(2);
-        expect(eventPublisher.publish).toHaveBeenCalledWith(
-          expect.any(SmartFurnitureHookupRenamedEvent),
-        );
-        expect(eventPublisher.publish).toHaveBeenCalledWith(
-          expect.any(SmartFurnitureHookupEndpointChangedEvent),
-        );
-        //expect(publishedEvents).toContain("SmartFurnitureHookupRenamedEvent");
-        //expect(publishedEvents).toContain("SmartFurnitureHookupEndpointChangedEvent");
       });
 
       it("should only update provided fields", async () => {
@@ -210,6 +203,7 @@ describe("SmartFurnitureHookupServiceImpl", () => {
           name: "Old Name",
           endpoint: "http://old.local",
         });
+
         repository.findSmartFurnitureHookupByID.mockResolvedValue(
           existingHookup,
         );
@@ -220,7 +214,7 @@ describe("SmartFurnitureHookupServiceImpl", () => {
         expect(existingHookup.endpoint.value).toBe("http://old.local");
 
         expect(
-          monitoringService.registerSmartFurnitureHookup,
+          physicalSmartFurnitureHookupCommunication.updateIngestingEndpoint,
         ).not.toHaveBeenCalled();
       });
 
@@ -244,9 +238,6 @@ describe("SmartFurnitureHookupServiceImpl", () => {
         repository.findSmartFurnitureHookupByID.mockResolvedValue(
           existingHookup,
         );
-        monitoringService.disconnectSmartFurnitureHookup.mockResolvedValue(
-          undefined,
-        );
 
         const result = await service.deleteSmartFurnitureHookup("delete-id");
 
@@ -254,8 +245,8 @@ describe("SmartFurnitureHookupServiceImpl", () => {
 
         expect(uow.executeTransactionally).toHaveBeenCalled();
         expect(
-          monitoringService.disconnectSmartFurnitureHookup,
-        ).toHaveBeenCalledWith(existingHookup.endpoint);
+          physicalSmartFurnitureHookupCommunication.updateIngestingEndpoint,
+        ).toHaveBeenCalledWith(existingHookup.endpoint.value, "");
         expect(repository.removeSmartFurnitureHookup).toHaveBeenCalledWith(
           existingHookup.id,
         );
