@@ -4,6 +4,7 @@ import type { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import type { Logger } from "pino";
 import { ZodError } from "zod";
+import { hookupErrorsTotal } from "@infrastructure/metrics/errorMetrics";
 
 interface ErrorHandlerEntry {
   status: number;
@@ -42,6 +43,8 @@ export function createErrorHandler(logger: Logger) {
       next(error);
       return;
     }
+
+    hookupErrorsTotal.add(1, { type: error.constructor.name });
 
     if (error instanceof ZodError) {
       const fieldErrors: Record<string, string> = {};
