@@ -11,7 +11,7 @@ import { SmartFurnitureHookupDeletedEvent } from "@domain/events/SmartFurnitureH
 
 describe("SmartFurnitureHookup Entity", () => {
   describe("create()", () => {
-    it("should create a user and emit UserCreatedEvent", () => {
+    it("should create a smart furniture hookup and emit SmartFurnitureHookupCreatedEvent", () => {
       const id = validId();
       const name = validSmartFurnitureHookupName();
       const utilityType = validUtilityType();
