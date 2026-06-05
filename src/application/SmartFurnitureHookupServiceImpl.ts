@@ -2,7 +2,6 @@ import { SmartFurnitureHookup } from "@domain/entities/SmartFurnitureHookup";
 import { SmartFurnitureHookupID } from "@domain/values/SmartFurnitureHookupID";
 import { SmartFurnitureHookupService } from "@application/inbound/SmartFurnitureHookupService";
 import { SmartFurnitureHookupRepository } from "@domain/ports/SmartFurnitureHookupRepository";
-import { MonitoringService } from "@application/outbound/MonitoringService";
 import { IdGenerator } from "@application/outbound/IdGenerator";
 import { UnitOfWork } from "@application/outbound/UnitOfWork";
 import { EventPublisher } from "@application/outbound/EventPublisher";
@@ -15,7 +14,7 @@ import { PhysicalSmartFurnitureHookupCommunication } from "@application/outbound
 
 export class SmartFurnitureHookupServiceImpl implements SmartFurnitureHookupService {
   readonly #repository: SmartFurnitureHookupRepository;
-  readonly #monitoringService: MonitoringService;
+  readonly #deviceIngestionUrl: string;
   readonly #physicalSmartFurnitureHookupCommunication: PhysicalSmartFurnitureHookupCommunication;
   readonly #idGenerator: IdGenerator;
   readonly #uow: UnitOfWork;
@@ -24,7 +23,7 @@ export class SmartFurnitureHookupServiceImpl implements SmartFurnitureHookupServ
 
   constructor(
     smartFurnitureHookupRepository: SmartFurnitureHookupRepository,
-    monitoringService: MonitoringService,
+    deviceIngestionUrl: string,
     physicalSmartFurnitureHookupCommunication: PhysicalSmartFurnitureHookupCommunication,
     idGenerator: IdGenerator,
     uow: UnitOfWork,
@@ -32,7 +31,7 @@ export class SmartFurnitureHookupServiceImpl implements SmartFurnitureHookupServ
     metrics: BusinessMetrics,
   ) {
     this.#repository = smartFurnitureHookupRepository;
-    this.#monitoringService = monitoringService;
+    this.#deviceIngestionUrl = deviceIngestionUrl;
     this.#physicalSmartFurnitureHookupCommunication =
       physicalSmartFurnitureHookupCommunication;
     this.#idGenerator = idGenerator;
@@ -41,17 +40,16 @@ export class SmartFurnitureHookupServiceImpl implements SmartFurnitureHookupServ
     this.#metrics = metrics;
   }
 
+  #buildDeviceIngestionUrl(smartFurnitureHookupID: string): string {
+    return `${this.#deviceIngestionUrl}/api/measurements?smart_furniture_hookup_id=${smartFurnitureHookupID}`;
+  }
+
   async #connectToPhysicalSmartFurnitureHookup(
     smartFurnitureHookup: SmartFurnitureHookup,
   ): Promise<undefined | Error> {
-    const ingestingEndpoint =
-      await this.#monitoringService.getIngestingEndpoint();
-
-    if (ingestingEndpoint instanceof Error) return ingestingEndpoint;
-
     return this.#physicalSmartFurnitureHookupCommunication.updateIngestingEndpoint(
       smartFurnitureHookup.endpoint.value,
-      `${ingestingEndpoint}?smart_furniture_hookup_id=${smartFurnitureHookup.id.value}`,
+      this.#buildDeviceIngestionUrl(smartFurnitureHookup.id.value),
     );
   }
 

@@ -1,5 +1,4 @@
 import type { SmartFurnitureHookupRepository } from "@domain/ports/SmartFurnitureHookupRepository";
-import type { MonitoringService } from "@application/outbound/MonitoringService";
 import type { IdGenerator } from "@application/outbound/IdGenerator";
 import type { UnitOfWork } from "@application/outbound/UnitOfWork";
 import type { EventPublisher } from "@application/outbound/EventPublisher";
@@ -22,7 +21,6 @@ import { PhysicalSmartFurnitureHookupCommunication } from "@application/outbound
 
 describe("SmartFurnitureHookupServiceImpl", () => {
   let repository: MockProxy<SmartFurnitureHookupRepository>;
-  let monitoringService: MockProxy<MonitoringService>;
   let physicalSmartFurnitureHookupCommunication: MockProxy<PhysicalSmartFurnitureHookupCommunication>;
   let idGenerator: MockProxy<IdGenerator>;
   let uow: MockProxy<UnitOfWork>;
@@ -31,10 +29,10 @@ describe("SmartFurnitureHookupServiceImpl", () => {
   let service: SmartFurnitureHookupServiceImpl;
 
   const mockID = "mockID";
+  const deviceIngestionUrl = "http://gateway:80";
 
   beforeEach(() => {
     repository = mock<SmartFurnitureHookupRepository>();
-    monitoringService = mock<MonitoringService>();
     physicalSmartFurnitureHookupCommunication =
       mock<PhysicalSmartFurnitureHookupCommunication>();
     idGenerator = mock<IdGenerator>();
@@ -50,7 +48,7 @@ describe("SmartFurnitureHookupServiceImpl", () => {
 
     service = new SmartFurnitureHookupServiceImpl(
       repository,
-      monitoringService,
+      deviceIngestionUrl,
       physicalSmartFurnitureHookupCommunication,
       idGenerator,
       uow,
@@ -60,7 +58,7 @@ describe("SmartFurnitureHookupServiceImpl", () => {
   });
 
   describe("createSmartFurnitureHookup()", () => {
-    it("should create a smart furniture hookup, connect it to monitoring and publish event via outbox", async () => {
+    it("should create a smart furniture hookup, connect it and publish event via outbox", async () => {
       const params = {
         name: validSmartFurnitureHookupName().toString(),
         utilityType: validUtilityType().toString(),
@@ -84,11 +82,13 @@ describe("SmartFurnitureHookupServiceImpl", () => {
 
       expect(uow.executeTransactionally).toHaveBeenCalled();
       expect(repository.saveSmartFurnitureHookup).toHaveBeenCalledWith(hookup);
-      expect(monitoringService.getIngestingEndpoint).toHaveBeenCalled();
 
       expect(
         physicalSmartFurnitureHookupCommunication.updateIngestingEndpoint,
-      ).toHaveBeenCalled();
+      ).toHaveBeenCalledWith(
+        params.endpoint,
+        `${deviceIngestionUrl}/api/measurements?smart_furniture_hookup_id=${mockID}`,
+      );
 
       expect(eventPublisher.publish).toHaveBeenCalledTimes(1);
       expect(eventPublisher.publish).toHaveBeenCalledWith(

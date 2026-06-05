@@ -7,7 +7,6 @@ import {
   createPresentationLayer,
 } from "@bootstrap/composeApp";
 import { createApp } from "@bootstrap/app";
-import { MonitoringService } from "@application/outbound/MonitoringService";
 import { PhysicalSmartFurnitureHookupCommunication } from "@application/outbound/PhysicalSmartFurnitureHookupCommunication";
 
 vi.mock("@bootstrap/config", () => ({
@@ -16,7 +15,7 @@ vi.mock("@bootstrap/config", () => ({
     mongo: { uri: "mongodb://placeholder" },
     logLevel: "silent" as const,
     skipSeed: false,
-    monitoringServiceUrl: "http://localhost:3001",
+    deviceIngestionUrl: "http://gateway:80",
     appName: "test-smart-furniture-hookup-service",
   },
 }));
@@ -32,9 +31,6 @@ export async function composeAppForComponentTest(): Promise<ComponentTestContext
 
   const infra = createInfrastructureLayer(logger);
 
-  const mockMonitoringService: MonitoringService = {
-    getIngestingEndpoint: vi.fn().mockResolvedValue(undefined),
-  };
   const mockPhysicalSmartFurnitureHookupCommunication: PhysicalSmartFurnitureHookupCommunication =
     {
       updateIngestingEndpoint: vi.fn().mockResolvedValue(undefined),
@@ -42,7 +38,7 @@ export async function composeAppForComponentTest(): Promise<ComponentTestContext
 
   const application = createApplicationLayer(
     infra.repository,
-    mockMonitoringService,
+    "http://gateway:80",
     mockPhysicalSmartFurnitureHookupCommunication,
     infra.idGenerator,
     infra.uow,

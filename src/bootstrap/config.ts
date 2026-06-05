@@ -8,8 +8,7 @@ export const EnvSchema = z.object({
   KAFKA_CLIENT_ID: z.string().default("hookup-service"),
   KAFKA_BOOTSTRAP_SERVERS: z.string().default("kafka:9092"),
   KAFKA_GROUP_ID: z.string().default("hookup-service-group"),
-  MONITORING_SERVICE_HOST: z.string().default("monitoring"),
-  MONITORING_SERVICE_PORT: z.coerce.number().default(3000),
+  DEVICE_INGESTION_URL: z.string().default("http://localhost:80"),
   LOG_LEVEL: z
     .enum(["trace", "debug", "info", "warn", "error", "fatal"])
     .default("info"),
@@ -38,7 +37,7 @@ export const config = {
     brokers: env.KAFKA_BOOTSTRAP_SERVERS.split(","),
     groupId: env.KAFKA_GROUP_ID,
   },
-  monitoringServiceUrl: `http://${env.MONITORING_SERVICE_HOST}:${env.MONITORING_SERVICE_PORT}`,
+  deviceIngestionUrl: env.DEVICE_INGESTION_URL,
   logLevel: env.LOG_LEVEL,
   appName: env.NAME,
 } as const;

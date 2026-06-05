@@ -1,13 +1,11 @@
 import type { Express } from "express";
 import { MongooseSmartFurnitureHookupRepository } from "@infrastructure/mongo/MongooseSmartFurnitureHookupRepository";
-import { HTTPMonitoringService } from "@infrastructure/HTTPMonitoringService";
 import { NodeCryptoIdGenerator } from "@infrastructure/NodeCryptoIdGenerator";
 import { MongoOutboxEventPublisher } from "@infrastructure/events/MongoOutboxEventPublisher";
 import { Logger } from "pino";
 import { MongoUnitOfWork } from "@infrastructure/mongo/MongoUnitOfWork";
 import { SmartFurnitureHookupServiceImpl } from "@application/SmartFurnitureHookupServiceImpl";
 import { SmartFurnitureHookupRepository } from "@domain/ports/SmartFurnitureHookupRepository";
-import { MonitoringService } from "@application/outbound/MonitoringService";
 import { IdGenerator } from "@application/outbound/IdGenerator";
 import { UnitOfWork } from "@application/outbound/UnitOfWork";
 import { EventPublisher } from "@application/outbound/EventPublisher";
@@ -29,10 +27,6 @@ export interface ComposedApp {
 export function createInfrastructureLayer(logger: Logger) {
   return {
     repository: new MongooseSmartFurnitureHookupRepository(),
-    monitoringService: new HTTPMonitoringService(
-      config.monitoringServiceUrl,
-      logger,
-    ),
     physicalSmartFurnitureHookupCommunication:
       new HTTPPhysicalSmartFurnitureHookupCommunication(logger),
     idGenerator: new NodeCryptoIdGenerator(),
@@ -46,7 +40,7 @@ export function createInfrastructureLayer(logger: Logger) {
 
 export function createApplicationLayer(
   repository: SmartFurnitureHookupRepository,
-  monitoringService: MonitoringService,
+  deviceIngestionUrl: string,
   physicalSmartFurnitureHookupCommunication: PhysicalSmartFurnitureHookupCommunication,
   idGenerator: IdGenerator,
   uow: UnitOfWork,
@@ -56,7 +50,7 @@ export function createApplicationLayer(
   return {
     smartFurnitureHookupService: new SmartFurnitureHookupServiceImpl(
       repository,
-      monitoringService,
+      deviceIngestionUrl,
       physicalSmartFurnitureHookupCommunication,
       idGenerator,
       uow,
@@ -83,7 +77,7 @@ export async function composeApp(logger: Logger): Promise<ComposedApp> {
 
   const application = createApplicationLayer(
     infra.repository,
-    infra.monitoringService,
+    config.deviceIngestionUrl,
     infra.physicalSmartFurnitureHookupCommunication,
     infra.idGenerator,
     infra.uow,
