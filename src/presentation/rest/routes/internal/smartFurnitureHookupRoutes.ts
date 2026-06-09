@@ -12,5 +12,9 @@ export function smartFurnitureHookupRoutes(
     smartFurnitureHookupController.getSmartFurnitureHookup(req, res),
   );
 
+  router.get("/", (req, res) =>
+    smartFurnitureHookupController.getSmartFurnitureHookups(req, res),
+  );
+
   return router;
 }
